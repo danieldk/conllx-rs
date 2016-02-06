@@ -1,0 +1,4 @@
+[package]
+name = "conllx"
+version = "0.0.1"
+authors = ["Daniël de Kok <me@danieldk.eu>"]
