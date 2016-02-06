@@ -2,3 +2,8 @@
 name = "conllx"
 version = "0.0.1"
 authors = ["Daniël de Kok <me@danieldk.eu>"]
+description = "Readers/writers for the CoNLL-X dependency format"
+homepage = "https://github.com/danieldk/conllx-rs"
+repository = "https://github.com/danieldk/conllx-rs"
+license = "MIT"
+readme = "README.md"
