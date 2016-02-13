@@ -121,26 +121,28 @@ impl Token {
     }
 
     /// Create a new token from the specified fields.
-    pub fn new_from(form: Option<String>,
-                    lemma: Option<String>,
-                    cpos: Option<String>,
-                    pos: Option<String>,
-                    features: Option<String>,
-                    head: Option<usize>,
-                    head_rel: Option<String>,
-                    p_head: Option<usize>,
-                    p_head_rel: Option<String>)
-                    -> Token {
+    pub fn new_from<S>(form: Option<S>,
+                       lemma: Option<S>,
+                       cpos: Option<S>,
+                       pos: Option<S>,
+                       features: Option<S>,
+                       head: Option<usize>,
+                       head_rel: Option<S>,
+                       p_head: Option<usize>,
+                       p_head_rel: Option<S>)
+                       -> Token
+        where S: Into<String>
+    {
         Token {
-            form: form,
-            lemma: lemma,
-            cpos: cpos,
-            pos: pos,
-            features: features.map(|s| Features { features: s }),
+            form: form.map(|i| i.into()),
+            lemma: lemma.map(|i| i.into()),
+            cpos: cpos.map(|i| i.into()),
+            pos: pos.map(|i| i.into()),
+            features: features.map(|s| Features { features: s.into() }),
             head: head,
-            head_rel: head_rel,
+            head_rel: head_rel.map(|i| i.into()),
             p_head: p_head,
-            p_head_rel: p_head_rel,
+            p_head_rel: p_head_rel.map(|i| i.into()),
         }
     }
 
@@ -195,28 +197,38 @@ impl Token {
     }
 
     /// Set the word form or punctuation symbol.
-    pub fn set_form(&mut self, form: Option<String>) {
-        self.form = form
+    pub fn set_form<S>(&mut self, form: Option<S>)
+        where S: Into<String>
+    {
+        self.form = form.map(|i| i.into())
     }
 
     /// Set the lemma or stem of the word form.
-    pub fn set_lemma(&mut self, lemma: Option<String>) {
-        self.lemma = lemma
+    pub fn set_lemma<S>(&mut self, lemma: Option<S>)
+        where S: Into<String>
+    {
+        self.lemma = lemma.map(|i| i.into())
     }
 
     /// Set the coarse-grained part-of-speech tag.
-    pub fn set_cpos(&mut self, cpos: Option<String>) {
-        self.cpos = cpos
+    pub fn set_cpos<S>(&mut self, cpos: Option<S>)
+        where S: Into<String>
+    {
+        self.cpos = cpos.map(|i| i.into())
     }
 
     /// Set the fine-grained part-of-speech tag.
-    pub fn set_pos(&mut self, pos: Option<String>) {
-        self.pos = pos
+    pub fn set_pos<S>(&mut self, pos: Option<S>)
+        where S: Into<String>
+    {
+        self.pos = pos.map(|i| i.into())
     }
 
     /// Set the syntactic and/or morphological features of the token.
-    pub fn set_features(&mut self, features: Option<String>) {
-        self.features = features.map(|s| Features { features: s })
+    pub fn set_features<S>(&mut self, features: Option<String>)
+        where S: Into<String>
+    {
+        self.features = features.map(|s| Features { features: s.into() })
     }
 
     /// Set the head of the token. This is the sentence position
@@ -227,8 +239,10 @@ impl Token {
     }
 
     /// Set the dependency relation to the head of this token.
-    pub fn set_head_rel(&mut self, head_rel: Option<String>) {
-        self.head_rel = head_rel
+    pub fn set_head_rel<S>(&mut self, head_rel: Option<S>)
+        where S: Into<String>
+    {
+        self.head_rel = head_rel.map(|i| i.into())
     }
 
     /// Set the projective head of the token. This is the sentence position
@@ -240,8 +254,10 @@ impl Token {
     }
 
     /// Set the dependency relation to the projective head of this token.
-    pub fn set_p_head_rel(&mut self, p_head_rel: Option<String>) {
-        self.p_head_rel = p_head_rel
+    pub fn set_p_head_rel<S>(&mut self, p_head_rel: Option<S>)
+        where S: Into<String>
+    {
+        self.p_head_rel = p_head_rel.map(|i| i.into())
     }
 }
 
