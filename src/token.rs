@@ -213,32 +213,6 @@ impl Token {
         }
     }
 
-    /// Create a new token from the specified fields.
-    pub fn from_fields<S>(form: Option<S>,
-                          lemma: Option<S>,
-                          cpos: Option<S>,
-                          pos: Option<S>,
-                          features: Option<S>,
-                          head: Option<usize>,
-                          head_rel: Option<S>,
-                          p_head: Option<usize>,
-                          p_head_rel: Option<S>)
-                          -> Token
-        where S: Into<String>
-    {
-        Token {
-            form: form.map(|i| i.into()),
-            lemma: lemma.map(|i| i.into()),
-            cpos: cpos.map(|i| i.into()),
-            pos: pos.map(|i| i.into()),
-            features: features.map(|s| Features { features: s.into() }),
-            head: head,
-            head_rel: head_rel.map(|i| i.into()),
-            p_head: p_head,
-            p_head_rel: p_head_rel.map(|i| i.into()),
-        }
-    }
-
     /// Get the word form or punctuation symbol.
     pub fn form(&self) -> &Option<String> {
         &self.form
