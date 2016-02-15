@@ -81,15 +81,15 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 
             try!(parse_numeric_field(iter.next()));
 
-            let tok = Token::new_from(parse_string_field(iter.next()),
-                                      parse_string_field(iter.next()),
-                                      parse_string_field(iter.next()),
-                                      parse_string_field(iter.next()),
-                                      parse_string_field(iter.next()),
-                                      try!(parse_numeric_field(iter.next())),
-                                      parse_string_field(iter.next()),
-                                      try!(parse_numeric_field(iter.next())),
-                                      parse_string_field(iter.next()));
+            let tok = Token::from_fields(parse_string_field(iter.next()),
+                                         parse_string_field(iter.next()),
+                                         parse_string_field(iter.next()),
+                                         parse_string_field(iter.next()),
+                                         parse_string_field(iter.next()),
+                                         try!(parse_numeric_field(iter.next())),
+                                         parse_string_field(iter.next()),
+                                         try!(parse_numeric_field(iter.next())),
+                                         parse_string_field(iter.next()));
 
             tokens.push(tok);
         }

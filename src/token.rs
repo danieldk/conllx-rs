@@ -81,6 +81,99 @@ impl<'a> IntoIterator for &'a mut Sentence {
     }
 }
 
+/// A builder for `Token`s.
+///
+/// The `Token` type stores a CoNLL-X token. However, since this format
+/// permits a large number of fields, construction of a token can get
+/// tedious. This builder provides a fluent interface for creating `Token`s.
+pub struct TokenBuilder {
+    token: Token,
+}
+
+impl TokenBuilder {
+    /// Create a `Token` builder with all fields set to absent.
+    pub fn new() -> TokenBuilder {
+        TokenBuilder { token: Token::new() }
+    }
+
+    /// Set the word form or punctuation symbol.
+    pub fn form<S>(mut self, form: S) -> TokenBuilder
+        where S: Into<String>
+    {
+        self.token.set_form(Some(form));
+        self
+    }
+
+    /// Set the lemma or stem of the word form.
+    pub fn lemma<S>(mut self, lemma: S) -> TokenBuilder
+        where S: Into<String>
+    {
+        self.token.set_lemma(Some(lemma));
+        self
+    }
+
+    /// Set the coarse-grained part-of-speech tag.
+    pub fn cpos<S>(mut self, cpos: S) -> TokenBuilder
+        where S: Into<String>
+    {
+        self.token.set_cpos(Some(cpos));
+        self
+    }
+
+    /// Set the fine-grained part-of-speech tag.
+    pub fn pos<S>(mut self, pos: S) -> TokenBuilder
+        where S: Into<String>
+    {
+        self.token.set_pos(Some(pos));
+        self
+    }
+
+    /// Set the syntactic and/or morphological features of the token.
+    pub fn features<S>(mut self, features: S) -> TokenBuilder
+        where S: Into<String>
+    {
+        self.token.set_features(Some(features));
+        self
+    }
+
+    /// Set the head of the token. This is the sentence position
+    /// of the head **plus one**. If the head is 0, the token the root
+    /// of the dependency tree.
+    pub fn head(mut self, head: usize) -> TokenBuilder {
+        self.token.set_head(Some(head));
+        self
+    }
+
+    /// Set the dependency relation to the head of this token.
+    pub fn head_rel<S>(mut self, head_rel: S) -> TokenBuilder
+        where S: Into<String>
+    {
+        self.token.set_head_rel(Some(head_rel));
+        self
+    }
+
+    /// Set the projective head of the token. This is the sentence position
+    /// of the head **plus one**. If the head is 0, the token the root
+    /// of the dependency tree. The dependency structure resulting from the
+    /// projective heads must be projective.
+    pub fn p_head(mut self, p_head: usize) -> TokenBuilder {
+        self.token.set_p_head(Some(p_head));
+        self
+    }
+
+    /// Set the dependency relation to the projective head of this token.
+    pub fn p_head_rel<S>(mut self, p_head_rel: S) -> TokenBuilder
+        where S: Into<String>
+    {
+        self.token.set_p_head_rel(Some(p_head_rel));
+        self
+    }
+
+    pub fn token(self) -> Token {
+        self.token
+    }
+}
+
 /// A token in the CoNLL-X dependency format.
 ///
 /// The fields of CoNLLX tokens are described at:
@@ -121,16 +214,16 @@ impl Token {
     }
 
     /// Create a new token from the specified fields.
-    pub fn new_from<S>(form: Option<S>,
-                       lemma: Option<S>,
-                       cpos: Option<S>,
-                       pos: Option<S>,
-                       features: Option<S>,
-                       head: Option<usize>,
-                       head_rel: Option<S>,
-                       p_head: Option<usize>,
-                       p_head_rel: Option<S>)
-                       -> Token
+    pub fn from_fields<S>(form: Option<S>,
+                          lemma: Option<S>,
+                          cpos: Option<S>,
+                          pos: Option<S>,
+                          features: Option<S>,
+                          head: Option<usize>,
+                          head_rel: Option<S>,
+                          p_head: Option<usize>,
+                          p_head_rel: Option<S>)
+                          -> Token
         where S: Into<String>
     {
         Token {
@@ -225,7 +318,7 @@ impl Token {
     }
 
     /// Set the syntactic and/or morphological features of the token.
-    pub fn set_features<S>(&mut self, features: Option<String>)
+    pub fn set_features<S>(&mut self, features: Option<S>)
         where S: Into<String>
     {
         self.features = features.map(|s| Features { features: s.into() })

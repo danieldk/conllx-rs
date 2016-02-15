@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use super::ReadSentence;
 use super::{Sentence, WriteSentence};
-use super::Token;
+use super::{Token, TokenBuilder};
 
 const TEST_FRAGMENT: &'static str = r"1	Die	die	ART	ART	nsf	2	DET
 2	Großaufnahme	Großaufnahme	N	NN	nsf	0	ROOT
@@ -28,48 +28,44 @@ const TEST_FRAGMENT_MARKED_EMPTY: &'static str = r"1	Die	die	ART	ART	nsf	2	DET	_
 
 fn test_sentences() -> Vec<Sentence> {
     vec![Sentence::new(vec![
-    Token::new_from(
-        Some("Die"),
-        Some("die"),
-        Some("ART"),
-        Some("ART"),
-        Some("nsf"),
-        Some(2),
-        Some("DET"),
-        None,
-        None),
-    Token::new_from(
-        Some("Großaufnahme"),
-        Some("Großaufnahme"),
-        Some("N"),
-        Some("NN"),
-        Some("nsf"),
-        Some(0),
-        Some("ROOT"),
-        None,
-        None),
+    TokenBuilder::new()
+        .form("Die")
+        .lemma("die")
+        .cpos("ART")
+        .pos("ART")
+        .features("nsf")
+        .head(2)
+        .head_rel("DET")
+        .token(),
+    TokenBuilder::new()
+        .form("Großaufnahme")
+        .lemma("Großaufnahme")
+        .cpos("N")
+        .pos("NN")
+        .features("nsf")
+        .head(0)
+        .head_rel("ROOT")
+        .token(),
 ]),
          Sentence::new(vec![
-    Token::new_from(
-        Some("Gilles"),
-        Some("Gilles"),
-        Some("N"),
-        Some("NE"),
-        Some("nsm"),
-        Some(0),
-        Some("ROOT"),
-        None,
-        None),
-    Token::new_from(
-        Some("Deleuze"),
-        Some("Deleuze"),
-        Some("N"),
-        Some("NE"),
-        Some("case:nominative|number:singular|gender:masculine"),
-        Some(1),
-        Some("APP"),
-        None,
-        None),
+    TokenBuilder::new()
+        .form("Gilles")
+        .lemma("Gilles")
+        .cpos("N")
+        .pos("NE")
+        .features("nsm")
+        .head(0)
+        .head_rel("ROOT")
+        .token(),
+    TokenBuilder::new()
+        .form("Deleuze")
+        .lemma("Deleuze")
+        .cpos("N")
+        .pos("NE")
+        .features("case:nominative|number:singular|gender:masculine")
+        .head(1)
+        .head_rel("APP")
+        .token(),
         ])]
 }
 
@@ -119,24 +115,24 @@ fn writer() {
 }
 
 fn token_with_features() -> Vec<Token> {
-    vec![Token::new_from(Some("Deleuze"),
-                         Some("Deleuze"),
-                         Some("N"),
-                         Some("NE"),
-                         Some("case:nominative|number:singular|gender:masculine"),
-                         Some(1),
-                         Some("APP"),
-                         None,
-                         None),
-         Token::new_from(Some("Deleuze"),
-                         Some("Deleuze"),
-                         Some("N"),
-                         Some("NE"),
-                         Some("nominative|singular|masculine"),
-                         Some(1),
-                         Some("APP"),
-                         None,
-                         None)]
+    vec![TokenBuilder::new()
+             .form("Gilles")
+             .lemma("Gilles")
+             .cpos("N")
+             .pos("NE")
+             .features("case:nominative|number:singular|gender:masculine")
+             .head(0)
+             .head_rel("ROOT")
+             .token(),
+         TokenBuilder::new()
+             .form("Deleuze")
+             .lemma("Deleuze")
+             .cpos("N")
+             .pos("NE")
+             .features("nominative|singular|masculine")
+             .head(1)
+             .head_rel("APP")
+             .token()]
 }
 
 fn features_correct() -> Vec<BTreeMap<String, Option<String>>> {
