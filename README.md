@@ -9,4 +9,4 @@ This is a package for reading and writing CONLL-X files in Rust.
 This package can be used with Cargo:
 
     [dependencies]
-    conllx = 0.0.1
+    conllx = 0.1.0
