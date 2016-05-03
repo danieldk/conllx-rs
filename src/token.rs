@@ -214,23 +214,23 @@ impl Token {
     }
 
     /// Get the word form or punctuation symbol.
-    pub fn form(&self) -> &Option<String> {
-        &self.form
+    pub fn form(&self) -> Option<&str> {
+        self.form.as_ref().map(String::as_ref)
     }
 
     /// Get the lemma or stem of the word form.
-    pub fn lemma(&self) -> &Option<String> {
-        &self.lemma
+    pub fn lemma(&self) -> Option<&str> {
+        self.lemma.as_ref().map(String::as_ref)
     }
 
     /// Get the coarse-grained part-of-speech tag.
-    pub fn cpos(&self) -> &Option<String> {
-        &self.cpos
+    pub fn cpos(&self) -> Option<&str> {
+        self.cpos.as_ref().map(String::as_ref)
     }
 
     /// Get the fine-grained part-of-speech tag.
-    pub fn pos(&self) -> &Option<String> {
-        &self.pos
+    pub fn pos(&self) -> Option<&str> {
+        self.pos.as_ref().map(String::as_ref)
     }
 
     /// Get the syntactic and/or morphological features of the token.
@@ -241,26 +241,26 @@ impl Token {
     /// Get the head of the token. This is the sentence position
     /// of the head **plus one**. If the head is 0, the token the root
     /// of the dependency tree.
-    pub fn head(&self) -> &Option<usize> {
-        &self.head
+    pub fn head(&self) -> Option<usize> {
+        self.head
     }
 
     /// Get the dependency relation to the head of this token.
-    pub fn head_rel(&self) -> &Option<String> {
-        &self.head_rel
+    pub fn head_rel(&self) -> Option<&str> {
+        self.head_rel.as_ref().map(String::as_ref)
     }
 
     /// Get the projective head of the token. This is the sentence position
     /// of the head **plus one**. If the head is 0, the token the root
     /// of the dependency tree. The dependency structure resulting from the
     /// projective heads must be projective.
-    pub fn p_head(&self) -> &Option<usize> {
-        &self.p_head
+    pub fn p_head(&self) -> Option<usize> {
+        self.p_head
     }
 
     /// Get the dependency relation to the projective head of this token.
-    pub fn p_head_rel(&self) -> &Option<String> {
-        &self.p_head_rel
+    pub fn p_head_rel(&self) -> Option<&str> {
+        self.p_head_rel.as_ref().map(String::as_ref)
     }
 
     /// Set the word form or punctuation symbol.
