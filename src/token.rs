@@ -2,6 +2,7 @@ use std::collections;
 use std::fmt;
 use std::ops;
 use std::slice;
+use std::vec;
 
 /// A sentence consists of zero or more `Token`s. It is a small wrapper
 /// around `Vec<Token>` that provides some extra convenience. For example,
@@ -60,6 +61,15 @@ impl ops::Index<usize> for Sentence {
 impl ops::IndexMut<usize> for Sentence {
     fn index_mut(&mut self, index: usize) -> &mut Token {
         &mut self.tokens[index]
+    }
+}
+
+impl IntoIterator for Sentence {
+    type Item = Token;
+    type IntoIter = vec::IntoIter<Token>;
+
+    fn into_iter(self) -> vec::IntoIter<Token> {
+        self.tokens.into_iter()
     }
 }
 
