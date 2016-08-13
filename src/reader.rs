@@ -1,35 +1,7 @@
-use std::fmt;
 use std::io;
-use std::num;
 
 use token::{Sentence, Token, EMPTY_TOKEN};
-
-#[derive(Debug)]
-pub enum Error {
-    Io(io::Error),
-    Parse(num::ParseIntError),
-}
-
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Error {
-        Error::Io(err)
-    }
-}
-
-impl From<num::ParseIntError> for Error {
-    fn from(err: num::ParseIntError) -> Error {
-        Error::Parse(err)
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Error::Io(ref err) => write!(f, "{}", err),
-            Error::Parse(ref err) => write!(f, "{}", err),
-        }
-    }
-}
+use error::Error;
 
 pub trait ReadSentence {
     fn read_sentence(&mut self) -> Result<Option<Sentence>, Error>;

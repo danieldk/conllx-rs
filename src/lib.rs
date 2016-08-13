@@ -1,3 +1,6 @@
+mod error;
+pub use error::Error;
+
 mod reader;
 pub use reader::{ReadSentence, Reader, Sentences};
 

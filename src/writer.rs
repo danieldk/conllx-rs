@@ -1,6 +1,6 @@
 use std::io;
 
-use reader::Error;
+use error::Error;
 use token::Sentence;
 
 /// A trait for objects that can write CoNLL-X `Sentence`s.
