@@ -88,7 +88,8 @@ pub struct PartitioningWriter<W>
     fold: usize,
 }
 
-impl<W> PartitioningWriter<W> where W: WriteSentence
+impl<W> PartitioningWriter<W>
+    where W: WriteSentence
 {
     pub fn new(writers: Vec<W>) -> PartitioningWriter<W> {
         PartitioningWriter {
@@ -98,7 +99,8 @@ impl<W> PartitioningWriter<W> where W: WriteSentence
     }
 }
 
-impl<W> WriteSentence for PartitioningWriter<W> where W: WriteSentence
+impl<W> WriteSentence for PartitioningWriter<W>
+    where W: WriteSentence
 {
     fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error> {
         if self.fold == self.writers.len() {
