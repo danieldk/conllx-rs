@@ -3,19 +3,30 @@ use std::io;
 use token::{Sentence, Token, EMPTY_TOKEN};
 use error::Error;
 
+/// A trait for objects that can read CoNLL-X `Sentence`s
 pub trait ReadSentence {
+    /// Read a `Sentence` from this object.
+    ///
+    /// # Errors
+    ///
+    /// A call to `read_sentence` may generate an error to indicate that
+    /// the operation could not be completed.
     fn read_sentence(&mut self) -> Result<Option<Sentence>, Error>;
 }
 
+/// Reader for CoNLL-X sentences.
 pub struct Reader<R> {
     read: R,
 }
 
 impl<R: io::BufRead> Reader<R> {
+    /// Construct a new reader from an object that implements the
+    /// `io::BufRead` trait.
     pub fn new(read: R) -> Reader<R> {
         Reader { read: read }
     }
 
+    /// Get an iterator over the `Sentence`s in this reader.
     pub fn sentences(self) -> Sentences<R> {
         Sentences { reader: self }
     }
