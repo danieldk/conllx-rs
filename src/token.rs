@@ -244,8 +244,8 @@ impl Token {
     }
 
     /// Get the syntactic and/or morphological features of the token.
-    pub fn features(&self) -> &Option<Features> {
-        &self.features
+    pub fn features(&self) -> Option<&Features> {
+        self.features.as_ref()
     }
 
     /// Get the head of the token. This is the sentence position
