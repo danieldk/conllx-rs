@@ -8,7 +8,7 @@ use std::vec;
 /// around `Vec<Token>` that provides some extra convenience. For example,
 /// the implementation of the `Display` trait outputs the sentence in
 /// CoNLL-X format.
-#[derive(Debug,PartialEq)]
+#[derive(Clone, Debug,PartialEq)]
 pub struct Sentence {
     tokens: Vec<Token>,
 }
@@ -194,7 +194,7 @@ impl TokenBuilder {
 /// (since it can be derived from the sentence position of the token).
 /// If a particular field is absent (*_* in the CoNLL-X format), its
 /// value is `None`.
-#[derive(Debug,PartialEq)]
+#[derive(Clone,Debug,PartialEq)]
 pub struct Token {
     form: Option<String>,
     lemma: Option<String>,
@@ -341,7 +341,7 @@ impl Token {
 /// This data type is used to represent features on a `Token`. In the CoNLL-X
 /// specification, these are morphological features of the token. However,
 /// they are used as a free form list or mapping of features.
-#[derive(Debug,PartialEq)]
+#[derive(Clone,Debug,PartialEq)]
 pub struct Features {
     features: String,
 }
