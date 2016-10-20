@@ -32,6 +32,15 @@ impl<R: io::BufRead> Reader<R> {
     }
 }
 
+impl<R: io::BufRead> IntoIterator for Reader<R> {
+    type Item = Result<Sentence, Error>;
+    type IntoIter = Sentences<R>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.sentences()
+    }
+}
+
 impl<R: io::BufRead> ReadSentence for Reader<R> {
     fn read_sentence(&mut self) -> Result<Option<Sentence>, Error> {
         let mut line = String::new();
