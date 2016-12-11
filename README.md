@@ -11,4 +11,4 @@ usage information.
 This package can be used with Cargo:
 
     [dependencies]
-    conllx = 0.2.1
+    conllx = 0.3
