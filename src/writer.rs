@@ -75,7 +75,7 @@ impl<W: io::Write> WriteSentence for Writer<W> {
 /// among multiple writers.
 ///
 /// For example, suppose that a `PartitioningWriter` is wraps writers
-/// *w1*, *w2*, and sentences s_[1-5]$ are written. The sentences are then
+/// *w1*, *w2*, and sentences *s[1-5]* are written. The sentences are then
 /// written as follows:
 ///
 /// * s1 -> w1
