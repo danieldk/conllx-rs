@@ -4,10 +4,11 @@ use std::ops;
 use std::slice;
 use std::vec;
 
-/// A sentence consists of zero or more `Token`s. It is a small wrapper
-/// around `Vec<Token>` that provides some extra convenience. For example,
-/// the implementation of the `Display` trait outputs the sentence in
-/// CoNLL-X format.
+/// A sentence with the CoNLL-X annotation layers.
+///
+/// This data type is a small wrapper around `Vec<Token>` that provides some
+/// extra convenience. For example, the implementation of the `Display` trait
+/// outputs the sentence in CoNLL-X format.
 #[derive(Clone, Debug,PartialEq)]
 pub struct Sentence {
     tokens: Vec<Token>,
@@ -184,7 +185,7 @@ impl TokenBuilder {
     }
 }
 
-/// A token in the CoNLL-X dependency format.
+/// A token with the CoNLL-X annotation layers.
 ///
 /// The fields of CoNLLX tokens are described at:
 ///
@@ -338,9 +339,10 @@ impl Token {
     }
 }
 
-/// This data type is used to represent features on a `Token`. In the CoNLL-X
-/// specification, these are morphological features of the token. However,
-/// they are used as a free form list or mapping of features.
+/// Token features.
+///
+/// In the CoNLL-X specification, these are morphological features of the
+/// token. Typically, the features are a list or a key-value mapping.
 #[derive(Clone,Debug,PartialEq)]
 pub struct Features {
     features: String,

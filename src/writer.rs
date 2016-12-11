@@ -14,8 +14,10 @@ pub trait WriteSentence {
     fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error>;
 }
 
-/// A writer for CoNLL-X sentences. This writer will write sentences
-/// to the embedded writer in CoNLL-X tabular format.
+/// A writer for CoNLL-X sentences.
+///
+/// This writer will write sentences to the embedded writer in CoNLL-X
+/// tabular format.
 pub struct Writer<W> {
     write: W,
     first: bool,

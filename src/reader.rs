@@ -14,7 +14,7 @@ pub trait ReadSentence {
     fn read_sentence(&mut self) -> Result<Option<Sentence>, Error>;
 }
 
-/// Reader for CoNLL-X sentences.
+/// A reader for CoNLL-X sentences.
 pub struct Reader<R> {
     read: R,
 }
@@ -89,7 +89,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
     }
 }
 
-/// Sentences is an iterator over the sentences in a `Reader`.
+/// An iterator over the sentences in a `Reader`.
 pub struct Sentences<R> {
     reader: Reader<R>,
 }

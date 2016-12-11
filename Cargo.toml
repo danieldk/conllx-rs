@@ -1,9 +1,9 @@
 [package]
 name = "conllx"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Daniël de Kok <me@danieldk.eu>"]
 description = "Readers/writers for the CoNLL-X dependency format"
-documentation = "http://rustdoc.danieldk.eu/conllx/"
+documentation = "https://docs.rs/conllx/"
 homepage = "https://github.com/danieldk/conllx-rs"
 repository = "https://github.com/danieldk/conllx-rs"
 license = "Apache-2.0"
