@@ -1,5 +1,6 @@
 use std::io;
 
+use features::Features;
 use token::{Sentence, Token, EMPTY_TOKEN};
 use error::{ErrorKind, Result, ResultExt};
 
@@ -78,7 +79,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
             token.set_lemma(parse_string_field(iter.next()));
             token.set_cpos(parse_string_field(iter.next()));
             token.set_pos(parse_string_field(iter.next()));
-            token.set_features(parse_string_field(iter.next()));
+            token.set_features(parse_string_field(iter.next()).map(Features::from_string));
             token.set_head(parse_numeric_field(iter.next())?);
             token.set_head_rel(parse_string_field(iter.next()));
             token.set_p_head(parse_numeric_field(iter.next())?);

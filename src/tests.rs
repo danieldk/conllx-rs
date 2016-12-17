@@ -3,8 +3,7 @@ use std::str;
 use std::collections::BTreeMap;
 
 use super::ReadSentence;
-use super::{Sentence, WriteSentence};
-use super::{Token, TokenBuilder};
+use super::{Features, Sentence, Token, TokenBuilder, WriteSentence};
 
 const TEST_FRAGMENT: &'static str = r"1	Die	die	ART	ART	nsf	2	DET
 2	Großaufnahme	Großaufnahme	N	NN	nsf	0	ROOT
@@ -33,7 +32,7 @@ fn test_sentences() -> Vec<Sentence> {
         .lemma("die")
         .cpos("ART")
         .pos("ART")
-        .features("nsf")
+        .features(Features::from_string("nsf"))
         .head(2)
         .head_rel("DET")
         .token(),
@@ -42,7 +41,7 @@ fn test_sentences() -> Vec<Sentence> {
         .lemma("Großaufnahme")
         .cpos("N")
         .pos("NN")
-        .features("nsf")
+        .features(Features::from_string("nsf"))
         .head(0)
         .head_rel("ROOT")
         .token(),
@@ -53,7 +52,7 @@ fn test_sentences() -> Vec<Sentence> {
         .lemma("Gilles")
         .cpos("N")
         .pos("NE")
-        .features("nsm")
+        .features(Features::from_string("nsm"))
         .head(0)
         .head_rel("ROOT")
         .token(),
@@ -62,7 +61,7 @@ fn test_sentences() -> Vec<Sentence> {
         .lemma("Deleuze")
         .cpos("N")
         .pos("NE")
-        .features("case:nominative|number:singular|gender:masculine")
+        .features(Features::from_string("case:nominative|number:singular|gender:masculine"))
         .head(1)
         .head_rel("APP")
         .token(),
@@ -120,7 +119,7 @@ fn token_with_features() -> Vec<Token> {
              .lemma("Gilles")
              .cpos("N")
              .pos("NE")
-             .features("case:nominative|number:singular|gender:masculine")
+             .features(Features::from_string("case:nominative|number:singular|gender:masculine"))
              .head(0)
              .head_rel("ROOT")
              .token(),
@@ -129,7 +128,7 @@ fn token_with_features() -> Vec<Token> {
              .lemma("Deleuze")
              .cpos("N")
              .pos("NE")
-             .features("nominative|singular|masculine")
+             .features(Features::from_string("nominative|singular|masculine"))
              .head(1)
              .head_rel("APP")
              .token()]

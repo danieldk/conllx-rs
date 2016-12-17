@@ -1,8 +1,9 @@
-use std::collections;
 use std::fmt;
 use std::ops;
 use std::slice;
 use std::vec;
+
+use features::Features;
 
 /// A sentence with the CoNLL-X annotation layers.
 ///
@@ -140,9 +141,7 @@ impl TokenBuilder {
     }
 
     /// Set the syntactic and/or morphological features of the token.
-    pub fn features<S>(mut self, features: S) -> TokenBuilder
-        where S: Into<String>
-    {
+    pub fn features(mut self, features: Features) -> TokenBuilder {
         self.token.set_features(Some(features));
         self
     }
@@ -303,10 +302,8 @@ impl Token {
     }
 
     /// Set the syntactic and/or morphological features of the token.
-    pub fn set_features<S>(&mut self, features: Option<S>)
-        where S: Into<String>
-    {
-        self.features = features.map(|s| Features { features: s.into() })
+    pub fn set_features(&mut self, features: Option<Features>) {
+        self.features = features
     }
 
     /// Set the head of the token. This is the sentence position
@@ -336,46 +333,6 @@ impl Token {
         where S: Into<String>
     {
         self.p_head_rel = p_head_rel.map(|i| i.into())
-    }
-}
-
-/// Token features.
-///
-/// In the CoNLL-X specification, these are morphological features of the
-/// token. Typically, the features are a list or a key-value mapping.
-#[derive(Clone,Debug,PartialEq)]
-pub struct Features {
-    features: String,
-}
-
-impl Features {
-    /// Get the features field as a key-value mapping. This assumes that
-    /// the key-value pairs are separed using a vertical bar (`|`) and keys
-    /// and values using a colon (`:`). If the value is absent, corresponding
-    /// value in the mapping is `None`.
-    pub fn as_map(&self) -> collections::BTreeMap<String, Option<String>> {
-        let mut features = collections::BTreeMap::new();
-
-        for fv in self.features.split('|') {
-            let mut iter = fv.split(':');
-            if let Some(k) = iter.next() {
-                let v = iter.next().map(|s| s.to_owned());
-                features.insert(k.to_owned(), v.to_owned());
-            }
-        }
-
-        features
-    }
-
-    /// Get the features field.
-    pub fn as_str(&self) -> &str {
-        self.features.as_ref()
-    }
-}
-
-impl fmt::Display for Features {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(self.features.as_ref())
     }
 }
 
