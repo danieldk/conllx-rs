@@ -11,3 +11,6 @@ readme = "README.md"
 exclude = [
   ".gitignore"
 ]
+
+[dependencies]
+error-chain = "0.7"

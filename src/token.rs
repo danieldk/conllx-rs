@@ -42,9 +42,9 @@ impl fmt::Display for Sentence {
 
         for (id, token) in self.iter().enumerate() {
             if id == last_id {
-                try!(write!(f, "{}\t{}", id + 1, token))
+                write!(f, "{}\t{}", id + 1, token)?
             } else {
-                try!(write!(f, "{}\t{}\n", id + 1, token))
+                write!(f, "{}\t{}\n", id + 1, token)?
             }
         }
 

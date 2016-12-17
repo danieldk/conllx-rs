@@ -1,7 +1,7 @@
 use std::io;
 
 use token::{Sentence, Token, EMPTY_TOKEN};
-use error::Error;
+use error::{ErrorKind, Result, ResultExt};
 
 /// A trait for objects that can read CoNLL-X `Sentence`s
 pub trait ReadSentence {
@@ -11,7 +11,7 @@ pub trait ReadSentence {
     ///
     /// A call to `read_sentence` may generate an error to indicate that
     /// the operation could not be completed.
-    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error>;
+    fn read_sentence(&mut self) -> Result<Option<Sentence>>;
 }
 
 /// A reader for CoNLL-X sentences.
@@ -33,7 +33,7 @@ impl<R: io::BufRead> Reader<R> {
 }
 
 impl<R: io::BufRead> IntoIterator for Reader<R> {
-    type Item = Result<Sentence, Error>;
+    type Item = Result<Sentence>;
     type IntoIter = Sentences<R>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -42,7 +42,7 @@ impl<R: io::BufRead> IntoIterator for Reader<R> {
 }
 
 impl<R: io::BufRead> ReadSentence for Reader<R> {
-    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error> {
+    fn read_sentence(&mut self) -> Result<Option<Sentence>> {
         let mut line = String::new();
         let mut tokens = Vec::new();
 
@@ -50,7 +50,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
             line.clear();
 
             // End of reader.
-            if try!(self.read.read_line(&mut line)) == 0 {
+            if self.read.read_line(&mut line)? == 0 {
                 if tokens.is_empty() {
                     return Ok(None);
                 }
@@ -71,7 +71,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 
             let mut iter = line.trim().split_terminator('\t');
 
-            try!(parse_numeric_field(iter.next()));
+            parse_numeric_field(iter.next())?;
 
             let mut token = Token::new();
             token.set_form(parse_string_field(iter.next()));
@@ -79,9 +79,9 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
             token.set_cpos(parse_string_field(iter.next()));
             token.set_pos(parse_string_field(iter.next()));
             token.set_features(parse_string_field(iter.next()));
-            token.set_head(try!(parse_numeric_field(iter.next())));
+            token.set_head(parse_numeric_field(iter.next())?);
             token.set_head_rel(parse_string_field(iter.next()));
-            token.set_p_head(try!(parse_numeric_field(iter.next())));
+            token.set_p_head(parse_numeric_field(iter.next())?);
             token.set_p_head_rel(parse_string_field(iter.next()));
 
             tokens.push(token);
@@ -95,9 +95,9 @@ pub struct Sentences<R> {
 }
 
 impl<R: io::BufRead> Iterator for Sentences<R> {
-    type Item = Result<Sentence, Error>;
+    type Item = Result<Sentence>;
 
-    fn next(&mut self) -> Option<Result<Sentence, Error>> {
+    fn next(&mut self) -> Option<Result<Sentence>> {
         match self.reader.read_sentence() {
             Ok(None) => None,
             Ok(Some(sent)) => Some(Ok(sent)),
@@ -116,14 +116,14 @@ fn parse_string_field(field: Option<&str>) -> Option<String> {
     })
 }
 
-fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>, Error> {
+fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>> {
     match field {
         None => Ok(None),
         Some(s) => {
             if s == EMPTY_TOKEN {
                 return Ok(None);
             } else {
-                Ok(Some(try!(s.parse())))
+                Ok(Some(s.parse().chain_err(|| ErrorKind::ParseIntFieldError(s.to_owned()))?))
             }
         }
     }

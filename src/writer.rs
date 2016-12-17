@@ -1,6 +1,6 @@
 use std::io;
 
-use error::Error;
+use error::Result;
 use token::Sentence;
 
 /// A trait for objects that can write CoNLL-X `Sentence`s.
@@ -11,7 +11,7 @@ pub trait WriteSentence {
     ///
     /// A call to `write_sentence` may generate an error to indicate that
     /// the operation could not be completed.
-    fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error>;
+    fn write_sentence(&mut self, sentence: &Sentence) -> Result<()>;
 }
 
 /// A writer for CoNLL-X sentences.
@@ -59,12 +59,12 @@ impl<W: io::Write> Writer<W> {
 }
 
 impl<W: io::Write> WriteSentence for Writer<W> {
-    fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error> {
+    fn write_sentence(&mut self, sentence: &Sentence) -> Result<()> {
         if self.first {
             self.first = false;
-            try!(write!(self.write, "{}", sentence))
+            write!(self.write, "{}", sentence)?
         } else {
-            try!(write!(self.write, "\n\n{}", sentence))
+            write!(self.write, "\n\n{}", sentence)?
         }
 
         Ok(())
@@ -104,12 +104,12 @@ impl<W> PartitioningWriter<W>
 impl<W> WriteSentence for PartitioningWriter<W>
     where W: WriteSentence
 {
-    fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error> {
+    fn write_sentence(&mut self, sentence: &Sentence) -> Result<()> {
         if self.fold == self.writers.len() {
             self.fold = 0
         }
 
-        try!(self.writers[self.fold].write_sentence(sentence));
+        self.writers[self.fold].write_sentence(sentence)?;
         self.fold += 1;
 
         Ok(())

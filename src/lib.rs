@@ -1,5 +1,8 @@
+#[macro_use]
+extern crate error_chain;
+
 mod error;
-pub use error::Error;
+pub use error::{Error, ErrorKind, Result};
 
 mod reader;
 pub use reader::{ReadSentence, Reader, Sentences};
