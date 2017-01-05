@@ -105,7 +105,7 @@ pub struct TokenBuilder {
 impl TokenBuilder {
     /// Create a `Token` builder with all fields set to absent.
     pub fn new() -> TokenBuilder {
-        TokenBuilder { token: Token::new() }
+        Default::default()
     }
 
     /// Set the word form or punctuation symbol.
@@ -184,6 +184,12 @@ impl TokenBuilder {
     }
 }
 
+impl Default for TokenBuilder {
+    fn default() -> Self {
+        TokenBuilder { token: Default::default() }
+    }
+}
+
 /// A token with the CoNLL-X annotation layers.
 ///
 /// The fields of CoNLLX tokens are described at:
@@ -210,17 +216,7 @@ pub struct Token {
 impl Token {
     /// Create a new token where all the fields are absent.
     pub fn new() -> Token {
-        Token {
-            form: None,
-            lemma: None,
-            cpos: None,
-            pos: None,
-            features: None,
-            head: None,
-            head_rel: None,
-            p_head: None,
-            p_head_rel: None,
-        }
+        Default::default()
     }
 
     /// Get the word form or punctuation symbol.
@@ -333,6 +329,22 @@ impl Token {
         where S: Into<String>
     {
         self.p_head_rel = p_head_rel.map(|i| i.into())
+    }
+}
+
+impl Default for Token {
+    fn default() -> Self {
+        Token {
+            form: None,
+            lemma: None,
+            cpos: None,
+            pos: None,
+            features: None,
+            head: None,
+            head_rel: None,
+            p_head: None,
+            p_head_rel: None,
+        }
     }
 }
 

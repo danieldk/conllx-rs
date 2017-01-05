@@ -122,7 +122,7 @@ fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>> {
         None => Ok(None),
         Some(s) => {
             if s == EMPTY_TOKEN {
-                return Ok(None);
+                Ok(None)
             } else {
                 Ok(Some(s.parse().chain_err(|| ErrorKind::ParseIntFieldError(s.to_owned()))?))
             }
