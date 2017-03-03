@@ -1,6 +1,6 @@
 [package]
 name = "conllx"
-version = "0.3.2"
+version = "0.4.0"
 authors = ["Daniël de Kok <me@danieldk.eu>"]
 description = "Readers/writers for the CoNLL-X dependency format"
 documentation = "https://docs.rs/conllx/"
@@ -13,4 +13,4 @@ exclude = [
 ]
 
 [dependencies]
-error-chain = "0.7"
+error-chain = "0.9"
