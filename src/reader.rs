@@ -13,6 +13,13 @@ pub trait ReadSentence {
     /// A call to `read_sentence` may generate an error to indicate that
     /// the operation could not be completed.
     fn read_sentence(&mut self) -> Result<Option<Sentence>>;
+
+    /// Get an iterator over the sentences in this reader.
+    fn sentences(self) -> Sentences<Self>
+        where Self: Sized
+    {
+        Sentences { reader: self }
+    }
 }
 
 /// A reader for CoNLL-X sentences.
@@ -25,11 +32,6 @@ impl<R: io::BufRead> Reader<R> {
     /// `io::BufRead` trait.
     pub fn new(read: R) -> Reader<R> {
         Reader { read: read }
-    }
-
-    /// Get an iterator over the `Sentence`s in this reader.
-    pub fn sentences(self) -> Sentences<Reader<R>> {
-        Sentences { reader: self }
     }
 }
 
@@ -91,11 +93,15 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 }
 
 /// An iterator over the sentences in a `Reader`.
-pub struct Sentences<R> where R: ReadSentence {
+pub struct Sentences<R>
+    where R: ReadSentence
+{
     reader: R,
 }
 
-impl<R> Iterator for Sentences<R> where R: ReadSentence {
+impl<R> Iterator for Sentences<R>
+    where R: ReadSentence
+{
     type Item = Result<Sentence>;
 
     fn next(&mut self) -> Option<Result<Sentence>> {
@@ -108,12 +114,10 @@ impl<R> Iterator for Sentences<R> where R: ReadSentence {
 }
 
 fn parse_string_field(field: Option<&str>) -> Option<String> {
-    field.and_then(|s| {
-        if s == EMPTY_TOKEN {
-            None
-        } else {
-            Some(s.to_string())
-        }
+    field.and_then(|s| if s == EMPTY_TOKEN {
+        None
+    } else {
+        Some(s.to_string())
     })
 }
 
