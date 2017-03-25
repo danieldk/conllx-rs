@@ -22,7 +22,7 @@ impl Sentence {
     }
 
     /// Get the underlying vector of tokens.
-    pub fn as_tokens(&self) -> &Vec<Token> {
+    pub fn as_tokens(&self) -> &[Token] {
         &self.tokens
     }
 
