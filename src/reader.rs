@@ -28,14 +28,14 @@ impl<R: io::BufRead> Reader<R> {
     }
 
     /// Get an iterator over the `Sentence`s in this reader.
-    pub fn sentences(self) -> Sentences<R> {
+    pub fn sentences(self) -> Sentences<Reader<R>> {
         Sentences { reader: self }
     }
 }
 
 impl<R: io::BufRead> IntoIterator for Reader<R> {
     type Item = Result<Sentence>;
-    type IntoIter = Sentences<R>;
+    type IntoIter = Sentences<Reader<R>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.sentences()
@@ -91,11 +91,11 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 }
 
 /// An iterator over the sentences in a `Reader`.
-pub struct Sentences<R> {
-    reader: Reader<R>,
+pub struct Sentences<R> where R: ReadSentence {
+    reader: R,
 }
 
-impl<R: io::BufRead> Iterator for Sentences<R> {
+impl<R> Iterator for Sentences<R> where R: ReadSentence {
     type Item = Result<Sentence>;
 
     fn next(&mut self) -> Option<Result<Sentence>> {
