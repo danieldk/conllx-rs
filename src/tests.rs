@@ -26,46 +26,43 @@ const TEST_FRAGMENT_MARKED_EMPTY: &'static str = r"1	Die	die	ART	ART	nsf	2	DET	_
 2	Deleuze	Deleuze	N	NE	case:nominative|number:singular|gender:masculine	1	APP	_	_";
 
 fn test_sentences() -> Vec<Sentence> {
-    vec![Sentence::new(vec![
-    TokenBuilder::new()
-        .form("Die")
-        .lemma("die")
-        .cpos("ART")
-        .pos("ART")
-        .features(Features::from_string("nsf"))
-        .head(2)
-        .head_rel("DET")
-        .token(),
-    TokenBuilder::new()
-        .form("Großaufnahme")
-        .lemma("Großaufnahme")
-        .cpos("N")
-        .pos("NN")
-        .features(Features::from_string("nsf"))
-        .head(0)
-        .head_rel("ROOT")
-        .token(),
-]),
-         Sentence::new(vec![
-    TokenBuilder::new()
-        .form("Gilles")
-        .lemma("Gilles")
-        .cpos("N")
-        .pos("NE")
-        .features(Features::from_string("nsm"))
-        .head(0)
-        .head_rel("ROOT")
-        .token(),
-    TokenBuilder::new()
-        .form("Deleuze")
-        .lemma("Deleuze")
-        .cpos("N")
-        .pos("NE")
-        .features(Features::from_string("case:nominative|number:singular|gender:masculine"))
-        .head(1)
-        .head_rel("APP")
-        .token(),
-        ])]
+    vec![Sentence::new(vec![TokenBuilder::new()
+                                .form("Die")
+                                .lemma("die")
+                                .cpos("ART")
+                                .pos("ART")
+                                .features(Features::from_string("nsf"))
+                                .head(2)
+                                .head_rel("DET")
+                                .token(),
+                            TokenBuilder::new()
+                                .form("Großaufnahme")
+                                .lemma("Großaufnahme")
+                                .cpos("N")
+                                .pos("NN")
+                                .features(Features::from_string("nsf"))
+                                .head(0)
+                                .head_rel("ROOT")
+                                .token()]),
+         Sentence::new(vec![TokenBuilder::new()
+                                .form("Gilles")
+                                .lemma("Gilles")
+                                .cpos("N")
+                                .pos("NE")
+                                .features(Features::from_string("nsm"))
+                                .head(0)
+                                .head_rel("ROOT")
+                                .token(),
+                            TokenBuilder::new()
+                                .form("Deleuze")
+                                .lemma("Deleuze")
+                                .cpos("N")
+                                .pos("NE")
+                                .features(Features::from_string("case:nominative|number:\
+                                                                 singular|gender:masculine"))
+                                .head(1)
+                                .head_rel("APP")
+                                .token()])]
 }
 
 fn string_reader(s: &str) -> Box<io::BufRead> {
