@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate error_chain;
 
+extern crate itertools;
+
 extern crate petgraph;
 
 mod error;
@@ -11,6 +13,12 @@ pub use features::Features;
 
 mod graph;
 pub(crate) use graph::BfsWithDepth;
+
+mod proj;
+pub use proj::{Deprojectivize, Projectivize, HeadProjectivizer};
+
+#[cfg(test)]
+pub(crate) use proj::{sentence_to_graph, non_projective_edges};
 
 mod reader;
 pub use reader::{ReadSentence, Reader, Sentences};
@@ -27,6 +35,9 @@ extern crate lazy_static;
 
 #[cfg(test)]
 mod graph_tests;
+
+#[cfg(test)]
+mod proj_tests;
 
 #[cfg(test)]
 mod tests;

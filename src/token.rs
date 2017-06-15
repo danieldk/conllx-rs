@@ -21,9 +21,14 @@ impl Sentence {
         Sentence { tokens: tokens }
     }
 
-    /// Get the underlying vector of tokens.
+    /// Get the sentence tokens as a slice.
     pub fn as_tokens(&self) -> &[Token] {
         &self.tokens
+    }
+
+    /// Get the sentence tokens as a mutable slice.
+    pub fn as_tokens_mut(&mut self) -> &mut [Token] {
+        &mut self.tokens
     }
 
     /// Get an iterator over the sentence tokens.

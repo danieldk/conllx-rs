@@ -8,5 +8,10 @@ error_chain!{
             description("cannot parse integer field")
             display("cannot parse as integer field: '{}'", value)
         }
+
+        IncompleteGraphError(value: String) {
+            description("incomplete graph")
+            display("incomplete graph: '{}'", value)        	
+        }
     }
 }
