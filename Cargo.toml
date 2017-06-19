@@ -14,3 +14,7 @@ exclude = [
 
 [dependencies]
 error-chain = "0.9"
+petgraph = "0.4"
+
+[dev-dependencies]
+lazy_static = "0.2"
