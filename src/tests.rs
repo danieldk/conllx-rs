@@ -1,9 +1,8 @@
 use std::io;
 use std::str;
-use std::collections::BTreeMap;
 
 use super::ReadSentence;
-use super::{Features, Sentence, Token, TokenBuilder, WriteSentence};
+use super::{Features, Sentence, TokenBuilder, WriteSentence};
 
 const TEST_FRAGMENT: &'static str =
     r"1	Die	die	ART	ART	nsf	2	DET
@@ -120,54 +119,4 @@ fn writer() {
         TEST_FRAGMENT_MARKED_EMPTY,
         str::from_utf8(writer.get_ref()).unwrap()
     );
-}
-
-fn token_with_features() -> Vec<Token> {
-    vec![
-        TokenBuilder::new()
-            .form("Gilles")
-            .lemma("Gilles")
-            .cpos("N")
-            .pos("NE")
-            .features(Features::from_string(
-                "case:nominative|number:singular|gender:masculine",
-            ))
-            .head(0)
-            .head_rel("ROOT")
-            .token(),
-        TokenBuilder::new()
-            .form("Deleuze")
-            .lemma("Deleuze")
-            .cpos("N")
-            .pos("NE")
-            .features(Features::from_string("nominative|singular|masculine"))
-            .head(1)
-            .head_rel("APP")
-            .token(),
-    ]
-}
-
-fn features_correct() -> Vec<BTreeMap<String, Option<String>>> {
-    let mut correct1 = BTreeMap::new();
-    correct1.insert("case".to_owned(), Some("nominative".to_owned()));
-    correct1.insert("number".to_owned(), Some("singular".to_owned()));
-    correct1.insert("gender".to_owned(), Some("masculine".to_owned()));
-
-    let mut correct2 = BTreeMap::new();
-    correct2.insert("nominative".to_owned(), None);
-    correct2.insert("singular".to_owned(), None);
-    correct2.insert("masculine".to_owned(), None);
-
-    vec![correct1, correct2]
-}
-
-#[test]
-fn features() {
-    let tokens = token_with_features();
-    let features = features_correct();
-
-    for (token, correct) in tokens.iter().zip(features) {
-        let kv = token.features().as_ref().unwrap().as_map();
-        assert_eq!(correct, kv);
-    }
 }

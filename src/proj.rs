@@ -315,3 +315,91 @@ fn update_sentence(graph: &Graph<(), String, Directed>, sent: &Sentence) -> Sent
 
     new_sent
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs::File;
+    use std::io::BufReader;
+
+    use petgraph::graph::{NodeIndex, node_index};
+
+    use {Deprojectivize, HeadProjectivizer, Projectivize, ReadSentence, Reader, Sentence,
+         sentence_to_graph, non_projective_edges};
+
+    lazy_static! {
+    static ref NON_PROJECTIVE_EDGES: Vec<Vec<(NodeIndex, NodeIndex)>> = vec![
+    vec![(node_index(8), node_index(1))],
+    vec![(node_index(10), node_index(2))],
+    vec![(node_index(5), node_index(1))],
+    vec![(node_index(1), node_index(3)), (node_index(7), node_index(5))],
+    ];
+}
+
+    fn sent_non_projective_edges(sents: &[Sentence]) -> Vec<Vec<(NodeIndex, NodeIndex)>> {
+        let mut np_edges = Vec::new();
+
+        for sent in sents {
+            let graph = sentence_to_graph(sent).unwrap();
+            let np: Vec<_> = non_projective_edges(&graph)
+                .iter()
+                .map(|idx| graph.edge_endpoints(*idx).unwrap())
+                .collect();
+            np_edges.push(np);
+        }
+
+        np_edges
+    }
+
+    static PROJECTIVE_SENTENCES_FILENAME: &str = "testdata/projective.conll";
+
+    static NONPROJECTIVE_SENTENCES_FILENAME: &str = "testdata/nonprojective.conll";
+
+    fn read_sentences(filename: &str) -> Vec<Sentence> {
+        Reader::new(BufReader::new(File::open(filename).unwrap()))
+            .sentences()
+            .map(|s| s.unwrap())
+            .collect()
+
+    }
+
+    #[test]
+    fn deprojectivize_test() {
+        let projectivizer = HeadProjectivizer::new();
+        let non_projective: Vec<_> = read_sentences(PROJECTIVE_SENTENCES_FILENAME)
+            .iter()
+            .map(|s| {
+                projectivizer
+                    .deprojectivize(s)
+                    .expect("Cannot deprojectivize sentence")
+            })
+            .collect();
+
+
+        assert_eq!(
+            read_sentences(NONPROJECTIVE_SENTENCES_FILENAME),
+            non_projective
+        );
+    }
+
+    #[test]
+    fn non_projective_test() {
+        let test_edges =
+            sent_non_projective_edges(&read_sentences(NONPROJECTIVE_SENTENCES_FILENAME));
+        assert_eq!(*NON_PROJECTIVE_EDGES, test_edges);
+    }
+
+    #[test]
+    fn projectivize_test() {
+        let projectivizer = HeadProjectivizer::new();
+        let projective: Vec<_> = read_sentences(NONPROJECTIVE_SENTENCES_FILENAME)
+            .iter()
+            .map(|s| {
+                projectivizer
+                    .projectivize(s)
+                    .expect("Cannot projectivize sentence")
+            })
+            .collect();
+
+        assert_eq!(read_sentences(PROJECTIVE_SENTENCES_FILENAME), projective);
+    }
+}

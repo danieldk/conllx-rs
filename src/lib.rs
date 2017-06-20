@@ -34,10 +34,4 @@ pub use writer::{PartitioningWriter, WriteSentence, Writer};
 extern crate lazy_static;
 
 #[cfg(test)]
-mod graph_tests;
-
-#[cfg(test)]
-mod proj_tests;
-
-#[cfg(test)]
 mod tests;
