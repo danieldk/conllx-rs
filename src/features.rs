@@ -5,7 +5,7 @@ use std::fmt;
 ///
 /// In the CoNLL-X specification, these are morphological features of the
 /// token. Typically, the features are a list or a key-value mapping.
-#[derive(Clone,Debug,PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Features {
     features: String,
 }
@@ -17,7 +17,8 @@ impl Features {
     /// however they will not give a nice feature-value mapping when using
     /// `as_map`.
     pub fn from_string<S>(s: S) -> Self
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         Features { features: s.into() }
     }

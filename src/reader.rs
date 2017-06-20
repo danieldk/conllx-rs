@@ -16,7 +16,8 @@ pub trait ReadSentence {
 
     /// Get an iterator over the sentences in this reader.
     fn sentences(self) -> Sentences<Self>
-        where Self: Sized
+    where
+        Self: Sized,
     {
         Sentences { reader: self }
     }
@@ -94,13 +95,15 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 
 /// An iterator over the sentences in a `Reader`.
 pub struct Sentences<R>
-    where R: ReadSentence
+where
+    R: ReadSentence,
 {
     reader: R,
 }
 
 impl<R> Iterator for Sentences<R>
-    where R: ReadSentence
+where
+    R: ReadSentence,
 {
     type Item = Result<Sentence>;
 
@@ -128,7 +131,10 @@ fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>> {
             if s == EMPTY_TOKEN {
                 Ok(None)
             } else {
-                Ok(Some(s.parse().chain_err(|| ErrorKind::ParseIntFieldError(s.to_owned()))?))
+                Ok(Some(
+                    s.parse()
+                        .chain_err(|| ErrorKind::ParseIntFieldError(s.to_owned()))?,
+                ))
             }
         }
     }

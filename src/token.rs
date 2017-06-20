@@ -10,7 +10,7 @@ use features::Features;
 /// This data type is a small wrapper around `Vec<Token>` that provides some
 /// extra convenience. For example, the implementation of the `Display` trait
 /// outputs the sentence in CoNLL-X format.
-#[derive(Clone, Debug,PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Sentence {
     tokens: Vec<Token>,
 }
@@ -115,7 +115,8 @@ impl TokenBuilder {
 
     /// Set the word form or punctuation symbol.
     pub fn form<S>(mut self, form: S) -> TokenBuilder
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.token.set_form(Some(form));
         self
@@ -123,7 +124,8 @@ impl TokenBuilder {
 
     /// Set the lemma or stem of the word form.
     pub fn lemma<S>(mut self, lemma: S) -> TokenBuilder
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.token.set_lemma(Some(lemma));
         self
@@ -131,7 +133,8 @@ impl TokenBuilder {
 
     /// Set the coarse-grained part-of-speech tag.
     pub fn cpos<S>(mut self, cpos: S) -> TokenBuilder
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.token.set_cpos(Some(cpos));
         self
@@ -139,7 +142,8 @@ impl TokenBuilder {
 
     /// Set the fine-grained part-of-speech tag.
     pub fn pos<S>(mut self, pos: S) -> TokenBuilder
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.token.set_pos(Some(pos));
         self
@@ -161,7 +165,8 @@ impl TokenBuilder {
 
     /// Set the dependency relation to the head of this token.
     pub fn head_rel<S>(mut self, head_rel: S) -> TokenBuilder
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.token.set_head_rel(Some(head_rel));
         self
@@ -178,7 +183,8 @@ impl TokenBuilder {
 
     /// Set the dependency relation to the projective head of this token.
     pub fn p_head_rel<S>(mut self, p_head_rel: S) -> TokenBuilder
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.token.set_p_head_rel(Some(p_head_rel));
         self
@@ -205,7 +211,7 @@ impl Default for TokenBuilder {
 /// (since it can be derived from the sentence position of the token).
 /// If a particular field is absent (*_* in the CoNLL-X format), its
 /// value is `None`.
-#[derive(Clone,Debug,PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Token {
     form: Option<String>,
     lemma: Option<String>,
@@ -276,28 +282,32 @@ impl Token {
 
     /// Set the word form or punctuation symbol.
     pub fn set_form<S>(&mut self, form: Option<S>)
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.form = form.map(|i| i.into())
     }
 
     /// Set the lemma or stem of the word form.
     pub fn set_lemma<S>(&mut self, lemma: Option<S>)
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.lemma = lemma.map(|i| i.into())
     }
 
     /// Set the coarse-grained part-of-speech tag.
     pub fn set_cpos<S>(&mut self, cpos: Option<S>)
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.cpos = cpos.map(|i| i.into())
     }
 
     /// Set the fine-grained part-of-speech tag.
     pub fn set_pos<S>(&mut self, pos: Option<S>)
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.pos = pos.map(|i| i.into())
     }
@@ -316,7 +326,8 @@ impl Token {
 
     /// Set the dependency relation to the head of this token.
     pub fn set_head_rel<S>(&mut self, head_rel: Option<S>)
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.head_rel = head_rel.map(|i| i.into())
     }
@@ -331,7 +342,8 @@ impl Token {
 
     /// Set the dependency relation to the projective head of this token.
     pub fn set_p_head_rel<S>(&mut self, p_head_rel: Option<S>)
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         self.p_head_rel = p_head_rel.map(|i| i.into())
     }
@@ -360,16 +372,39 @@ impl fmt::Display for Token {
         let head_str = self.head.as_ref().map(|n| n.to_string());
         let p_head_str = self.p_head.as_ref().map(|n| n.to_string());
 
-        write!(f,
-               "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
-               self.form.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
-               self.lemma.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
-               self.cpos.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
-               self.pos.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
-               self.features.as_ref().map(|s| s.as_str()).unwrap_or(EMPTY_TOKEN),
-               head_str.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
-               self.head_rel.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
-               self.p_head.clone().map(|n| n.to_string()).unwrap_or(EMPTY_TOKEN.to_string()),
-               p_head_str.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN))
+        write!(
+            f,
+            "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            self.form
+                .as_ref()
+                .map(|s| s.as_ref())
+                .unwrap_or(EMPTY_TOKEN),
+            self.lemma
+                .as_ref()
+                .map(|s| s.as_ref())
+                .unwrap_or(EMPTY_TOKEN),
+            self.cpos
+                .as_ref()
+                .map(|s| s.as_ref())
+                .unwrap_or(EMPTY_TOKEN),
+            self.pos.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
+            self.features
+                .as_ref()
+                .map(|s| s.as_str())
+                .unwrap_or(EMPTY_TOKEN),
+            head_str.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
+            self.head_rel
+                .as_ref()
+                .map(|s| s.as_ref())
+                .unwrap_or(EMPTY_TOKEN),
+            self.p_head.clone().map(|n| n.to_string()).unwrap_or(
+                EMPTY_TOKEN
+                    .to_string(),
+            ),
+            p_head_str
+                .as_ref()
+                .map(|s| s.as_ref())
+                .unwrap_or(EMPTY_TOKEN)
+        )
     }
 }

@@ -84,14 +84,16 @@ impl<W: io::Write> WriteSentence for Writer<W> {
 /// * s4 -> w2
 /// * s5 -> w1
 pub struct PartitioningWriter<W>
-    where W: WriteSentence
+where
+    W: WriteSentence,
 {
     writers: Vec<W>,
     fold: usize,
 }
 
 impl<W> PartitioningWriter<W>
-    where W: WriteSentence
+where
+    W: WriteSentence,
 {
     pub fn new(writers: Vec<W>) -> PartitioningWriter<W> {
         PartitioningWriter {
@@ -102,7 +104,8 @@ impl<W> PartitioningWriter<W>
 }
 
 impl<W> WriteSentence for PartitioningWriter<W>
-    where W: WriteSentence
+where
+    W: WriteSentence,
 {
     fn write_sentence(&mut self, sentence: &Sentence) -> Result<()> {
         if self.fold == self.writers.len() {
