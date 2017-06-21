@@ -139,3 +139,50 @@ fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use std::io::{BufRead, Cursor};
+
+    use {ReadSentence, Sentence};
+    use tests::{TEST_SENTENCES, read_sentences};
+
+    static BASIC: &str = "testdata/basic.conll";
+
+    static DOUBLE_NEWLINE: &str = "testdata/double-newline.conll";
+
+    static EMPTY: &str = "testdata/empty.conll";
+
+    fn string_reader(s: &str) -> Box<BufRead> {
+        Box::new(Cursor::new(s.as_bytes().to_owned()))
+    }
+
+    fn test_parsing(correct: &[Sentence], fragment: &str) {
+        let sentences = read_sentences(fragment);
+        assert_eq!(correct, sentences.as_slice());
+    }
+
+    #[test]
+    fn reader() {
+        test_parsing(&*TEST_SENTENCES, BASIC);
+    }
+
+    #[test]
+    fn reader_robust() {
+        test_parsing(&*TEST_SENTENCES, DOUBLE_NEWLINE);
+    }
+
+    #[test]
+    fn reader_marked_empty() {
+        test_parsing(&*TEST_SENTENCES, EMPTY);
+    }
+
+    #[test]
+    #[should_panic(expected = "ParseIntError")]
+    fn reader_rejects_non_numeric_id() {
+        let mut reader = super::Reader::new(string_reader("test"));
+        reader.read_sentence().unwrap();
+    }
+
+}

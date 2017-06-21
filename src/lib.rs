@@ -30,8 +30,8 @@ mod writer;
 pub use writer::{PartitioningWriter, WriteSentence, Writer};
 
 #[cfg(test)]
-#[macro_use]
-extern crate lazy_static;
+mod tests;
 
 #[cfg(test)]
-mod tests;
+#[macro_use]
+extern crate lazy_static;

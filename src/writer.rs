@@ -118,3 +118,39 @@ where
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs::File;
+    use std::io;
+    use std::io::Read;
+    use std::str;
+
+    use super::{WriteSentence, Writer};
+    use tests::TEST_SENTENCES;
+
+    static EMPTY: &str = "testdata/empty.conll";
+
+    fn read_file(filename: &str) -> io::Result<String> {
+        let mut f = File::open(filename)?;
+        let mut contents = String::new();
+        f.read_to_string(&mut contents)?;
+        Ok(contents)
+    }
+
+
+    #[test]
+    fn writer() {
+        let output = Vec::new();
+        let mut writer = Writer::new(Box::new(output));
+
+        for sentence in &*TEST_SENTENCES {
+            writer.write_sentence(&sentence).unwrap();
+        }
+
+        assert_eq!(
+            read_file(EMPTY).unwrap(),
+            str::from_utf8(writer.get_ref()).unwrap()
+        );
+    }
+}

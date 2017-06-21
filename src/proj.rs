@@ -318,13 +318,11 @@ fn update_sentence(graph: &Graph<(), String, Directed>, sent: &Sentence) -> Sent
 
 #[cfg(test)]
 mod tests {
-    use std::fs::File;
-    use std::io::BufReader;
-
     use petgraph::graph::{NodeIndex, node_index};
 
-    use {Deprojectivize, HeadProjectivizer, Projectivize, ReadSentence, Reader, Sentence,
-         sentence_to_graph, non_projective_edges};
+    use {Deprojectivize, HeadProjectivizer, Projectivize, Sentence, sentence_to_graph,
+         non_projective_edges};
+    use tests::read_sentences;
 
     lazy_static! {
     static ref NON_PROJECTIVE_EDGES: Vec<Vec<(NodeIndex, NodeIndex)>> = vec![
@@ -353,14 +351,6 @@ mod tests {
     static PROJECTIVE_SENTENCES_FILENAME: &str = "testdata/projective.conll";
 
     static NONPROJECTIVE_SENTENCES_FILENAME: &str = "testdata/nonprojective.conll";
-
-    fn read_sentences(filename: &str) -> Vec<Sentence> {
-        Reader::new(BufReader::new(File::open(filename).unwrap()))
-            .sentences()
-            .map(|s| s.unwrap())
-            .collect()
-
-    }
 
     #[test]
     fn deprojectivize_test() {
