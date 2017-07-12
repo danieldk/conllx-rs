@@ -1,33 +1,54 @@
 use std::collections::BTreeMap;
 use std::fmt;
+use std::fmt::{Debug, Display};
+
+use lazy_init::Lazy;
 
 /// Token features.
 ///
 /// In the CoNLL-X specification, these are morphological features of the
 /// token. Typically, the features are a list or a key-value mapping.
-#[derive(Clone, Debug, PartialEq)]
 pub struct Features {
     features: String,
+    feature_map: Lazy<BTreeMap<String, Option<String>>>,
 }
 
 impl Features {
     /// Create features from a string. The casual format uses key-value
     /// pairs that are separated by a vertical bar (`|`) and keys and
-    /// values using a colon (`:`). Arbitrary strings will also be expected,
+    /// values using a colon (`:`). Arbitrary strings will also be accepted,
     /// however they will not give a nice feature-value mapping when using
     /// `as_map`.
     pub fn from_string<S>(s: S) -> Self
     where
         S: Into<String>,
     {
-        Features { features: s.into() }
+        Features {
+            features: s.into(),
+            feature_map: Lazy::new(),
+        }
     }
 
     /// Get the features field as a key-value mapping. This assumes that
     /// the key-value pairs are separed using a vertical bar (`|`) and keys
     /// and values using a colon (`:`). If the value is absent, corresponding
     /// value in the mapping is `None`.
-    pub fn as_map(&self) -> BTreeMap<String, Option<String>> {
+    ///
+    /// The feature map is constructed lazily:
+    ///
+    /// * If `as_map` is never called, the feature map is never created.
+    /// * If `as_map` is called once or more, the feature map is only created
+    ///   once.
+    pub fn as_map(&self) -> &BTreeMap<String, Option<String>> {
+        self.feature_map.get_or_create(|| self.as_map_eager())
+    }
+
+    /// Get the features field.
+    pub fn as_str(&self) -> &str {
+        self.features.as_ref()
+    }
+
+    fn as_map_eager(&self) -> BTreeMap<String, Option<String>> {
         let mut features = BTreeMap::new();
 
         for fv in self.features.split('|') {
@@ -40,15 +61,31 @@ impl Features {
 
         features
     }
+}
 
-    /// Get the features field.
-    pub fn as_str(&self) -> &str {
-        self.features.as_ref()
+impl Clone for Features {
+    fn clone(&self) -> Self {
+        Features {
+            features: self.features.clone(),
+            feature_map: Lazy::new(),
+        }
     }
 }
 
-impl fmt::Display for Features {
+impl Debug for Features {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Features {{ features: {} }}", self.features)
+    }
+}
+
+impl Display for Features {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(self.features.as_ref())
+    }
+}
+
+impl PartialEq for Features {
+    fn eq(&self, other: &Features) -> bool {
+        self.features.eq(&other.features)
     }
 }

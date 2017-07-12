@@ -3,6 +3,8 @@ extern crate error_chain;
 
 extern crate itertools;
 
+extern crate lazy_init;
+
 extern crate petgraph;
 
 mod error;

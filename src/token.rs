@@ -461,7 +461,7 @@ mod tests {
 
         for (token, correct) in tokens.iter().zip(features) {
             let kv = token.features().as_ref().unwrap().as_map();
-            assert_eq!(correct, kv);
+            assert_eq!(&correct, kv);
         }
     }
 }
