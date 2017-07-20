@@ -9,6 +9,11 @@ error_chain!{
             display("cannot parse as integer field: '{}'", value)
         }
 
+        ParseIdentifierFieldError(value: String) {
+            description("cannot parse identifier field")
+            display("cannot parse as identifier field: '{}'", value)
+        }
+
         IncompleteGraphError(value: String) {
             description("incomplete graph")
             display("incomplete graph: '{}'", value)        	

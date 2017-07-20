@@ -75,7 +75,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 
             let mut iter = line.trim().split_terminator('\t');
 
-            parse_numeric_field(iter.next())?;
+            parse_identifier_field(iter.next())?;
 
             let mut token = Token::new();
             token.set_form(parse_string_field(iter.next()));
@@ -122,6 +122,28 @@ fn parse_string_field(field: Option<&str>) -> Option<String> {
     } else {
         Some(s.to_string())
     })
+}
+
+fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>> {
+    match field {
+        None => {
+            return Err(
+                ErrorKind::ParseIdentifierFieldError(
+                    "A token identifier should be present".to_owned(),
+                ).into(),
+            )
+        }
+        Some(s) => {
+            if s == EMPTY_TOKEN {
+                return Err(ErrorKind::ParseIdentifierFieldError(s.to_owned()).into());
+            }
+
+            Ok(Some(
+                s.parse()
+                    .chain_err(|| ErrorKind::ParseIntFieldError(s.to_owned()))?,
+            ))
+        }
+    }
 }
 
 fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>> {
@@ -179,9 +201,16 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "ParseIntError")]
+    #[should_panic(expected = "ParseIntFieldError")]
     fn reader_rejects_non_numeric_id() {
         let mut reader = super::Reader::new(string_reader("test"));
+        reader.read_sentence().unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "ParseIdentifierFieldError")]
+    fn reader_rejects_underscore_id() {
+        let mut reader = super::Reader::new(string_reader("_"));
         reader.read_sentence().unwrap();
     }
 
