@@ -49,12 +49,8 @@ impl HeadProjectivizer {
                 .edge_endpoints(head_edge)
                 .expect("Endpoints of lifted edge could not be found");
 
-            if let Some(new_head) = self.search_attachment_point(
-                &graph,
-                cur_head,
-                *lifted_node,
-                pref_head_rel,
-            )
+            if let Some(new_head) =
+                self.search_attachment_point(&graph, cur_head, *lifted_node, pref_head_rel)
             {
                 let head_rel = graph
                     .remove_edge(head_edge)
@@ -162,20 +158,23 @@ impl HeadProjectivizer {
     ) -> (Graph<(), String, Directed>, HashMap<NodeIndex, String>) {
         let mut pref_head_labels = HashMap::new();
 
-        let prepared_graph = graph.map(|_, &node_val| node_val, |edge_idx, edge_val| {
-            let sep_idx = match edge_val.find('|') {
-                Some(idx) => idx,
-                None => return edge_val.clone(),
-            };
+        let prepared_graph = graph.map(
+            |_, &node_val| node_val,
+            |edge_idx, edge_val| {
+                let sep_idx = match edge_val.find('|') {
+                    Some(idx) => idx,
+                    None => return edge_val.clone(),
+                };
 
-            let (_, dep) = graph
-                .edge_endpoints(edge_idx)
-                .expect("Cannot lookup edge endpoints");
+                let (_, dep) = graph
+                    .edge_endpoints(edge_idx)
+                    .expect("Cannot lookup edge endpoints");
 
-            pref_head_labels.insert(dep, edge_val[sep_idx + 1..].to_owned());
+                pref_head_labels.insert(dep, edge_val[sep_idx + 1..].to_owned());
 
-            edge_val[..sep_idx].to_owned()
-        });
+                edge_val[..sep_idx].to_owned()
+            },
+        );
 
         (prepared_graph, pref_head_labels)
     }
@@ -250,7 +249,7 @@ pub fn sentence_to_graph(sentence: &Sentence) -> Result<Graph<(), String, Direct
                 return Err(
                     IncompleteGraphError(format!(
                         "edge from {} to {} does not have a \
-                                                         label",
+                         label",
                         head.index(),
                         dependent.index()
                     )).into(),
