@@ -154,16 +154,14 @@ fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>> {
 fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>> {
     match field {
         None => Ok(None),
-        Some(s) => {
-            if s == EMPTY_TOKEN {
-                Ok(None)
-            } else {
-                Ok(Some(
-                    s.parse()
-                        .chain_err(|| ErrorKind::ParseIntFieldError(s.to_owned()))?,
-                ))
-            }
-        }
+        Some(s) => if s == EMPTY_TOKEN {
+            Ok(None)
+        } else {
+            Ok(Some(
+                s.parse()
+                    .chain_err(|| ErrorKind::ParseIntFieldError(s.to_owned()))?,
+            ))
+        },
     }
 }
 
@@ -173,7 +171,7 @@ mod tests {
     use std::io::{BufRead, Cursor};
 
     use {ReadSentence, Sentence};
-    use tests::{TEST_SENTENCES, read_sentences};
+    use tests::{read_sentences, TEST_SENTENCES};
 
     static BASIC: &str = "testdata/basic.conll";
 

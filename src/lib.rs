@@ -17,10 +17,10 @@ mod graph;
 pub(crate) use graph::BfsWithDepth;
 
 mod proj;
-pub use proj::{Deprojectivize, Projectivize, HeadProjectivizer};
+pub use proj::{Deprojectivize, HeadProjectivizer, Projectivize};
 
 #[cfg(test)]
-pub(crate) use proj::{sentence_to_graph, non_projective_edges};
+pub(crate) use proj::{non_projective_edges, sentence_to_graph};
 
 mod reader;
 pub use reader::{ReadSentence, Reader, Sentences};

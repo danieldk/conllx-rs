@@ -68,7 +68,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use petgraph::graph::{Graph, NodeIndex, node_index};
+    use petgraph::graph::{node_index, Graph, NodeIndex};
     use petgraph::visit::Walker;
 
     use BfsWithDepth;

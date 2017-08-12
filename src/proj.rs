@@ -3,7 +3,7 @@ use std::cmp::{max, min};
 
 use itertools::Itertools;
 use petgraph::{Directed, Direction, Graph};
-use petgraph::graph::{EdgeIndex, NodeIndex, node_index};
+use petgraph::graph::{node_index, EdgeIndex, NodeIndex};
 use petgraph::visit::{Bfs, EdgeRef, NodeFiltered, Walker};
 
 use BfsWithDepth;
@@ -317,10 +317,10 @@ fn update_sentence(graph: &Graph<(), String, Directed>, sent: &Sentence) -> Sent
 
 #[cfg(test)]
 mod tests {
-    use petgraph::graph::{NodeIndex, node_index};
+    use petgraph::graph::{node_index, NodeIndex};
 
-    use {Deprojectivize, HeadProjectivizer, Projectivize, Sentence, sentence_to_graph,
-         non_projective_edges};
+    use {non_projective_edges, sentence_to_graph, Deprojectivize, HeadProjectivizer, Projectivize,
+         Sentence};
     use tests::read_sentences;
 
     lazy_static! {
