@@ -77,8 +77,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
 
             parse_identifier_field(iter.next())?;
 
-            let mut token = Token::new();
-            token.set_form(parse_string_field(iter.next()));
+            let mut token = Token::new(parse_form_field(iter.next())?);
             token.set_lemma(parse_string_field(iter.next()));
             token.set_cpos(parse_string_field(iter.next()));
             token.set_pos(parse_string_field(iter.next()));
@@ -114,6 +113,12 @@ where
             Err(e) => Some(Err(e)),
         }
     }
+}
+
+fn parse_form_field(field: Option<&str>) -> Result<String> {
+    field
+        .map(str::to_owned)
+        .ok_or(ErrorKind::MissingFormFieldError.into())
 }
 
 fn parse_string_field(field: Option<&str>) -> Option<String> {

@@ -5,11 +5,10 @@ use {Features, ReadSentence, Reader, Sentence, TokenBuilder};
 
 lazy_static!{
 
-pub static ref TEST_SENTENCES: Vec<Sentence> = 
+pub static ref TEST_SENTENCES: Vec<Sentence> =
     vec![
         Sentence::new(vec![
-            TokenBuilder::new()
-                .form("Die")
+            TokenBuilder::new("Die")
                 .lemma("die")
                 .cpos("ART")
                 .pos("ART")
@@ -17,8 +16,7 @@ pub static ref TEST_SENTENCES: Vec<Sentence> =
                 .head(2)
                 .head_rel("DET")
                 .token(),
-            TokenBuilder::new()
-                .form("Großaufnahme")
+            TokenBuilder::new("Großaufnahme")
                 .lemma("Großaufnahme")
                 .cpos("N")
                 .pos("NN")
@@ -28,8 +26,7 @@ pub static ref TEST_SENTENCES: Vec<Sentence> =
                 .token(),
         ]),
         Sentence::new(vec![
-            TokenBuilder::new()
-                .form("Gilles")
+            TokenBuilder::new("Gilles")
                 .lemma("Gilles")
                 .cpos("N")
                 .pos("NE")
@@ -37,8 +34,7 @@ pub static ref TEST_SENTENCES: Vec<Sentence> =
                 .head(0)
                 .head_rel("ROOT")
                 .token(),
-            TokenBuilder::new()
-                .form("Deleuze")
+            TokenBuilder::new("Deleuze")
                 .lemma("Deleuze")
                 .cpos("N")
                 .pos("NE")

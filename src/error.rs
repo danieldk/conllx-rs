@@ -4,6 +4,11 @@ error_chain!{
     }
 
     errors {
+        MissingFormFieldError {
+            description("form field is missing")
+            display("form field is missing")
+        }
+
         ParseIntFieldError(value: String) {
             description("cannot parse integer field")
             display("cannot parse as integer field: '{}'", value)
@@ -16,7 +21,7 @@ error_chain!{
 
         IncompleteGraphError(value: String) {
             description("incomplete graph")
-            display("incomplete graph: '{}'", value)        	
+            display("incomplete graph: '{}'", value)
         }
     }
 }

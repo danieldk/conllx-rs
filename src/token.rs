@@ -108,9 +108,14 @@ pub struct TokenBuilder {
 }
 
 impl TokenBuilder {
-    /// Create a `Token` builder with all fields set to absent.
-    pub fn new() -> TokenBuilder {
-        Default::default()
+    /// Create a `Token` builder with all non-form fields set to absent.
+    pub fn new<S>(form: S) -> TokenBuilder
+    where
+        S: Into<String>,
+    {
+        TokenBuilder {
+            token: Token::new(form),
+        }
     }
 
     /// Set the word form or punctuation symbol.
@@ -118,7 +123,7 @@ impl TokenBuilder {
     where
         S: Into<String>,
     {
-        self.token.set_form(Some(form));
+        self.token.set_form(form);
         self
     }
 
@@ -195,14 +200,6 @@ impl TokenBuilder {
     }
 }
 
-impl Default for TokenBuilder {
-    fn default() -> Self {
-        TokenBuilder {
-            token: Default::default(),
-        }
-    }
-}
-
 /// A token with the CoNLL-X annotation layers.
 ///
 /// The fields of CoNLLX tokens are described at:
@@ -215,7 +212,7 @@ impl Default for TokenBuilder {
 /// value is `None`.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Token {
-    form: Option<String>,
+    form: String,
     lemma: Option<String>,
     cpos: Option<String>,
     pos: Option<String>,
@@ -227,14 +224,27 @@ pub struct Token {
 }
 
 impl Token {
-    /// Create a new token where all the fields are absent.
-    pub fn new() -> Token {
-        Default::default()
+    /// Create a new token where all the non-form fields are absent.
+    pub fn new<S>(form: S) -> Token
+    where
+        S: Into<String>,
+    {
+        Token {
+            form: form.into(),
+            lemma: None,
+            cpos: None,
+            pos: None,
+            features: None,
+            head: None,
+            head_rel: None,
+            p_head: None,
+            p_head_rel: None,
+        }
     }
 
     /// Get the word form or punctuation symbol.
-    pub fn form(&self) -> Option<&str> {
-        self.form.as_ref().map(String::as_ref)
+    pub fn form(&self) -> &str {
+        self.form.as_ref()
     }
 
     /// Get the lemma or stem of the word form.
@@ -283,11 +293,11 @@ impl Token {
     }
 
     /// Set the word form or punctuation symbol.
-    pub fn set_form<S>(&mut self, form: Option<S>)
+    pub fn set_form<S>(&mut self, form: S)
     where
         S: Into<String>,
     {
-        self.form = form.map(|i| i.into())
+        self.form = form.into()
     }
 
     /// Set the lemma or stem of the word form.
@@ -351,22 +361,6 @@ impl Token {
     }
 }
 
-impl Default for Token {
-    fn default() -> Self {
-        Token {
-            form: None,
-            lemma: None,
-            cpos: None,
-            pos: None,
-            features: None,
-            head: None,
-            head_rel: None,
-            p_head: None,
-            p_head_rel: None,
-        }
-    }
-}
-
 pub const EMPTY_TOKEN: &'static str = "_";
 
 impl fmt::Display for Token {
@@ -377,10 +371,7 @@ impl fmt::Display for Token {
         write!(
             f,
             "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
-            self.form
-                .as_ref()
-                .map(|s| s.as_ref())
-                .unwrap_or(EMPTY_TOKEN),
+            self.form.as_str(),
             self.lemma
                 .as_ref()
                 .map(|s| s.as_ref())
@@ -419,8 +410,7 @@ mod tests {
 
     fn token_with_features() -> Vec<Token> {
         vec![
-            TokenBuilder::new()
-                .form("Gilles")
+            TokenBuilder::new("Gilles")
                 .lemma("Gilles")
                 .cpos("N")
                 .pos("NE")
@@ -430,8 +420,7 @@ mod tests {
                 .head(0)
                 .head_rel("ROOT")
                 .token(),
-            TokenBuilder::new()
-                .form("Deleuze")
+            TokenBuilder::new("Deleuze")
                 .lemma("Deleuze")
                 .cpos("N")
                 .pos("NE")

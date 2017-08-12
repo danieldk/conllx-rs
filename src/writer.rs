@@ -45,8 +45,8 @@ impl<W: io::Write> Writer<W> {
     /// let output = Vec::new();
     /// let mut writer = Writer::new(output);
     /// let sent = Sentence::new(vec![
-    ///   Token::new(),
-    ///   Token::new(),
+    ///   Token::new("hello"),
+    ///   Token::new("world"),
     /// ]);
     ///
     /// writer.write_sentence(&sent).unwrap();
