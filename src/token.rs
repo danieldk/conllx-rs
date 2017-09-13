@@ -104,7 +104,7 @@ impl<'a> IntoIterator for &'a mut Sentence {
     type Item = &'a mut Token;
     type IntoIter = slice::IterMut<'a, Token>;
 
-    fn into_iter(mut self) -> slice::IterMut<'a, Token> {
+    fn into_iter(self) -> slice::IterMut<'a, Token> {
         self.iter_mut()
     }
 }

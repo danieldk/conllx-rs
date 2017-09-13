@@ -285,7 +285,6 @@ pub fn non_projective_edges(graph: &Graph<(), String, Directed>) -> Vec<EdgeInde
                 }
             }
         }
-
     }
 
     non_projective.sort_by(|a, b| {
@@ -304,7 +303,7 @@ pub fn non_projective_edges(graph: &Graph<(), String, Directed>) -> Vec<EdgeInde
 fn update_sentence(graph: &Graph<(), String, Directed>, sent: &Sentence) -> Sentence {
     let mut new_sent = sent.clone();
     {
-        let mut tokens = new_sent.as_tokens_mut();
+        let tokens = new_sent.as_tokens_mut();
 
         for edge_ref in graph.edge_references() {
             tokens[edge_ref.target().index() - 1].set_head(Some(edge_ref.source().index()));
@@ -324,13 +323,13 @@ mod tests {
     use tests::read_sentences;
 
     lazy_static! {
-    static ref NON_PROJECTIVE_EDGES: Vec<Vec<(NodeIndex, NodeIndex)>> = vec![
-    vec![(node_index(8), node_index(1))],
-    vec![(node_index(10), node_index(2))],
-    vec![(node_index(5), node_index(1))],
-    vec![(node_index(1), node_index(3)), (node_index(7), node_index(5))],
-    ];
-}
+        static ref NON_PROJECTIVE_EDGES: Vec<Vec<(NodeIndex, NodeIndex)>> = vec![
+        vec![(node_index(8), node_index(1))],
+        vec![(node_index(10), node_index(2))],
+        vec![(node_index(5), node_index(1))],
+        vec![(node_index(1), node_index(3)), (node_index(7), node_index(5))],
+        ];
+    }
 
     fn sent_non_projective_edges(sents: &[Sentence]) -> Vec<Vec<(NodeIndex, NodeIndex)>> {
         let mut np_edges = Vec::new();

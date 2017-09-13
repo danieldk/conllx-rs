@@ -53,5 +53,4 @@ pub fn read_sentences(filename: &str) -> Vec<Sentence> {
         .sentences()
         .map(|s| s.unwrap())
         .collect()
-
 }
