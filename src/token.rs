@@ -58,6 +58,12 @@ impl fmt::Display for Sentence {
     }
 }
 
+impl From<Sentence> for Vec<Token> {
+    fn from(sentence: Sentence) -> Self {
+        sentence.tokens
+    }
+}
+
 impl ops::Index<usize> for Sentence {
     type Output = Token;
     fn index(&self, index: usize) -> &Token {
