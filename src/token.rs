@@ -17,8 +17,13 @@ pub struct Sentence {
 
 impl Sentence {
     /// Create a new `Sentence` from a vector of tokens.
-    pub fn new(tokens: Vec<Token>) -> Sentence {
-        Sentence { tokens: tokens }
+    pub fn new<T>(tokens: T) -> Sentence
+    where
+        T: Into<Vec<Token>>,
+    {
+        Sentence {
+            tokens: tokens.into(),
+        }
     }
 
     /// Get the sentence tokens as a slice.
