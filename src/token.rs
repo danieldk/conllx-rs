@@ -401,14 +401,14 @@ impl fmt::Display for Token {
                 .as_ref()
                 .map(|s| s.as_ref())
                 .unwrap_or(EMPTY_TOKEN),
-            self.p_head
-                .clone()
-                .map(|n| n.to_string(),)
-                .unwrap_or(EMPTY_TOKEN.to_string(),),
             p_head_str
                 .as_ref()
                 .map(|s| s.as_ref())
-                .unwrap_or(EMPTY_TOKEN)
+                .unwrap_or(EMPTY_TOKEN),
+            self.p_head_rel
+                .as_ref()
+                .map(|s| s.as_ref())
+                .unwrap_or(EMPTY_TOKEN),
         )
     }
 }

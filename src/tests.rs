@@ -15,6 +15,8 @@ pub static ref TEST_SENTENCES: Vec<Sentence> =
                 .features(Features::from_string("nsf"))
                 .head(2)
                 .head_rel("DET")
+                .p_head(3)
+                .p_head_rel("TEST")
                 .token(),
             TokenBuilder::new("Großaufnahme")
                 .lemma("Großaufnahme")
