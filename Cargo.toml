@@ -13,7 +13,7 @@ exclude = [
 ]
 
 [dependencies]
-error-chain = "0.9"
+error-chain = "0.11"
 itertools = "0.6"
 lazy-init = "0.1"
 petgraph = "0.4"
