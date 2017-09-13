@@ -20,3 +20,4 @@ petgraph = "0.4"
 
 [dev-dependencies]
 lazy_static = "0.2"
+pretty_assertions = "0.3.4"
