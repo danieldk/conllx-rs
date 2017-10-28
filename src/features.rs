@@ -117,3 +117,30 @@ fn map_to_string(feature_map: &BTreeMap<String, Option<String>>) -> String {
             }
         }).join("|")
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeMap;
+    
+    use super::Features;
+
+    #[test]
+    quickcheck! {
+        fn from_iter(feature_map: BTreeMap<String, Option<String>>) -> bool{
+            &feature_map == Features::from_iter(feature_map.clone()).as_map()
+        }
+    }
+
+    #[test]
+    fn from_iter_as_string() {
+        let feature_map = btreemap!{
+            "feature2" => Some("y"),
+            "feature3" => None,
+            "feature1" => Some("x")
+        };
+ 
+        let features = Features::from_iter(feature_map);
+
+        assert_eq!(features.as_str(), "feature1:x|feature2:y|feature3");
+    }
+}
