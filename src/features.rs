@@ -32,10 +32,12 @@ impl Features {
     }
 
     pub fn from_iter<I, S>(iter: I) -> Self
-        where I: IntoIterator<Item = (S, Option<S>)>,
-              S: Into<String> + Ord + Sync
+    where
+        I: IntoIterator<Item = (S, Option<S>)>,
+        S: Into<String> + Ord + Sync,
     {
-        let feature_map = BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
+        let feature_map =
+            BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
         let features = map_to_string(&feature_map);
 
         let lazy_feature_map = Lazy::new();
@@ -43,7 +45,7 @@ impl Features {
 
         Features {
             features,
-            feature_map: lazy_feature_map
+            feature_map: lazy_feature_map,
         }
     }
 
@@ -109,19 +111,19 @@ impl PartialEq for Features {
 }
 
 fn map_to_string(feature_map: &BTreeMap<String, Option<String>>) -> String {
-    feature_map.iter()
-        .map(|(k, v)| {
-            match *v {
-                Some(ref v) => format!("{}:{}", k, v),
-                None => k.to_owned()
-            }
-        }).join("|")
+    feature_map
+        .iter()
+        .map(|(k, v)| match *v {
+            Some(ref v) => format!("{}:{}", k, v),
+            None => k.to_owned(),
+        })
+        .join("|")
 }
 
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
-    
+
     use super::Features;
 
     #[test]
@@ -138,7 +140,7 @@ mod tests {
             "feature3" => None,
             "feature1" => Some("x")
         };
- 
+
         let features = Features::from_iter(feature_map);
 
         assert_eq!(features.as_str(), "feature1:x|feature2:y|feature3");
