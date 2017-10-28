@@ -1,7 +1,9 @@
 use std::collections::BTreeMap;
 use std::fmt;
 use std::fmt::{Debug, Display};
+use std::iter::FromIterator;
 
+use itertools::Itertools;
 use lazy_init::Lazy;
 
 /// Token features.
@@ -26,6 +28,24 @@ impl Features {
         Features {
             features: s.into(),
             feature_map: Lazy::new(),
+        }
+    }
+
+    pub fn from_iter<I, S>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = (S, Option<S>)>,
+        S: Into<String> + Ord + Sync,
+    {
+        let feature_map =
+            BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
+        let features = map_to_string(&feature_map);
+
+        let lazy_feature_map = Lazy::new();
+        lazy_feature_map.get_or_create(|| feature_map);
+
+        Features {
+            features,
+            feature_map: lazy_feature_map,
         }
     }
 
@@ -87,5 +107,42 @@ impl Display for Features {
 impl PartialEq for Features {
     fn eq(&self, other: &Features) -> bool {
         self.features.eq(&other.features)
+    }
+}
+
+fn map_to_string(feature_map: &BTreeMap<String, Option<String>>) -> String {
+    feature_map
+        .iter()
+        .map(|(k, v)| match *v {
+            Some(ref v) => format!("{}:{}", k, v),
+            None => k.to_owned(),
+        })
+        .join("|")
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeMap;
+
+    use super::Features;
+
+    #[test]
+    quickcheck! {
+        fn from_iter(feature_map: BTreeMap<String, Option<String>>) -> bool{
+            &feature_map == Features::from_iter(feature_map.clone()).as_map()
+        }
+    }
+
+    #[test]
+    fn from_iter_as_string() {
+        let feature_map = btreemap!{
+            "feature2" => Some("y"),
+            "feature3" => None,
+            "feature1" => Some("x")
+        };
+
+        let features = Features::from_iter(feature_map);
+
+        assert_eq!(features.as_str(), "feature1:x|feature2:y|feature3");
     }
 }
