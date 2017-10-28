@@ -31,10 +31,11 @@ impl Features {
         }
     }
 
-    pub fn from_iter<I>(iter: I) -> Self
-        where I: IntoIterator<Item = (String, Option<String>)>
+    pub fn from_iter<I, S>(iter: I) -> Self
+        where I: IntoIterator<Item = (S, Option<S>)>,
+              S: Into<String> + Ord + Sync
     {
-        let feature_map = BTreeMap::from_iter(iter);
+        let feature_map = BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
         let features = map_to_string(&feature_map);
 
         let lazy_feature_map = Lazy::new();
