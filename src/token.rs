@@ -69,6 +69,24 @@ impl From<Sentence> for Vec<Token> {
     }
 }
 
+impl<'a> From<&'a Sentence> for &'a [Token] {
+    fn from(sentence: &'a Sentence) -> Self {
+        &sentence.tokens
+    }
+}
+
+impl From<Vec<Token>> for Sentence {
+    fn from(tokens: Vec<Token>) -> Self {
+        Sentence { tokens }
+    }
+}
+
+impl<'a> From<&'a [Token]> for Sentence {
+    fn from(tokens: &'a [Token]) -> Self {
+        Sentence { tokens: tokens.to_owned() }
+    }
+}
+
 impl ops::Index<usize> for Sentence {
     type Output = Token;
     fn index(&self, index: usize) -> &Token {
@@ -417,7 +435,7 @@ impl fmt::Display for Token {
 mod tests {
     use std::collections::BTreeMap;
 
-    use super::{Features, Token, TokenBuilder};
+    use super::{Features, Sentence, Token, TokenBuilder};
 
     fn token_with_features() -> Vec<Token> {
         vec![
@@ -465,5 +483,17 @@ mod tests {
             let kv = token.features().as_ref().unwrap().as_map();
             assert_eq!(&correct, kv);
         }
+    }
+
+    #[test]
+    fn from_test() {
+        let tokens = token_with_features();
+        let sent: Sentence = tokens.as_slice().into();
+        let into_token_slice: &[Token] = (&sent).into();
+        assert_eq!(tokens.as_slice(), into_token_slice);
+
+        let sent: Sentence = tokens.clone().into();
+        let into_tokens: Vec<Token> = sent.into();
+        assert_eq!(tokens, into_tokens);
     }
 }
