@@ -104,6 +104,9 @@ impl Display for Features {
     }
 }
 
+impl Eq for Features {
+}
+
 impl PartialEq for Features {
     fn eq(&self, other: &Features) -> bool {
         self.features.eq(&other.features)

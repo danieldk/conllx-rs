@@ -239,7 +239,7 @@ impl TokenBuilder {
 /// (since it can be derived from the sentence position of the token).
 /// If a particular field is absent (*_* in the CoNLL-X format), its
 /// value is `None`.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Token {
     form: String,
     lemma: Option<String>,
