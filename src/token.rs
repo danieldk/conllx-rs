@@ -1,57 +1,19 @@
 use std::fmt;
-use std::ops;
-use std::slice;
-use std::vec;
 
 use features::Features;
 
 /// A sentence with the CoNLL-X annotation layers.
-///
-/// This data type is a small wrapper around `Vec<Token>` that provides some
-/// extra convenience. For example, the implementation of the `Display` trait
-/// outputs the sentence in CoNLL-X format.
-#[derive(Clone, Debug, PartialEq)]
-pub struct Sentence {
-    tokens: Vec<Token>,
-}
+pub type Sentence = Vec<Token>;
 
-impl Sentence {
-    /// Create a new `Sentence` from a vector of tokens.
-    pub fn new<T>(tokens: T) -> Sentence
-    where
-        T: Into<Vec<Token>>,
-    {
-        Sentence {
-            tokens: tokens.into(),
-        }
-    }
+/// This data type is a small wrapper around `Vec<Token>` that implements
+/// the `Display` trait. The sentence will formatted in CoNLL-X format.
+pub struct DisplaySentence<'a>(pub &'a Sentence);
 
-    /// Get the sentence tokens as a slice.
-    pub fn as_tokens(&self) -> &[Token] {
-        &self.tokens
-    }
-
-    /// Get the sentence tokens as a mutable slice.
-    pub fn as_tokens_mut(&mut self) -> &mut [Token] {
-        &mut self.tokens
-    }
-
-    /// Get an iterator over the sentence tokens.
-    pub fn iter(&self) -> slice::Iter<Token> {
-        self.tokens.iter()
-    }
-
-    /// Get a mutable iterator over the sentence tokens.
-    pub fn iter_mut(&mut self) -> slice::IterMut<Token> {
-        self.tokens.iter_mut()
-    }
-}
-
-impl fmt::Display for Sentence {
+impl<'a> fmt::Display for DisplaySentence<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let last_id = self.tokens.len() - 1;
+        let last_id = self.0.len() - 1;
 
-        for (id, token) in self.iter().enumerate() {
+        for (id, token) in self.0.iter().enumerate() {
             if id == last_id {
                 write!(f, "{}\t{}", id + 1, token)?
             } else {
@@ -60,70 +22,6 @@ impl fmt::Display for Sentence {
         }
 
         Ok(())
-    }
-}
-
-impl From<Sentence> for Vec<Token> {
-    fn from(sentence: Sentence) -> Self {
-        sentence.tokens
-    }
-}
-
-impl<'a> From<&'a Sentence> for &'a [Token] {
-    fn from(sentence: &'a Sentence) -> Self {
-        &sentence.tokens
-    }
-}
-
-impl From<Vec<Token>> for Sentence {
-    fn from(tokens: Vec<Token>) -> Self {
-        Sentence { tokens }
-    }
-}
-
-impl<'a> From<&'a [Token]> for Sentence {
-    fn from(tokens: &'a [Token]) -> Self {
-        Sentence { tokens: tokens.to_owned() }
-    }
-}
-
-impl ops::Index<usize> for Sentence {
-    type Output = Token;
-    fn index(&self, index: usize) -> &Token {
-        &self.tokens[index]
-    }
-}
-
-impl ops::IndexMut<usize> for Sentence {
-    fn index_mut(&mut self, index: usize) -> &mut Token {
-        &mut self.tokens[index]
-    }
-}
-
-impl IntoIterator for Sentence {
-    type Item = Token;
-    type IntoIter = vec::IntoIter<Token>;
-
-    fn into_iter(self) -> vec::IntoIter<Token> {
-        self.tokens.into_iter()
-    }
-}
-
-impl<'a> IntoIterator for &'a Sentence {
-    type Item = &'a Token;
-    type IntoIter = slice::Iter<'a, Token>;
-
-    fn into_iter(self) -> slice::Iter<'a, Token> {
-        self.iter()
-    }
-}
-
-impl<'a> IntoIterator for &'a mut Sentence {
-    type Item = &'a mut Token;
-    type IntoIter = slice::IterMut<'a, Token>;
-
-    fn into_iter(self) -> slice::IterMut<'a, Token> {
-        self.iter_mut()
     }
 }
 
@@ -435,7 +333,7 @@ impl fmt::Display for Token {
 mod tests {
     use std::collections::BTreeMap;
 
-    use super::{Features, Sentence, Token, TokenBuilder};
+    use super::{Features, Token, TokenBuilder};
 
     fn token_with_features() -> Vec<Token> {
         vec![
@@ -483,17 +381,5 @@ mod tests {
             let kv = token.features().as_ref().unwrap().as_map();
             assert_eq!(&correct, kv);
         }
-    }
-
-    #[test]
-    fn from_test() {
-        let tokens = token_with_features();
-        let sent: Sentence = tokens.as_slice().into();
-        let into_token_slice: &[Token] = (&sent).into();
-        assert_eq!(tokens.as_slice(), into_token_slice);
-
-        let sent: Sentence = tokens.clone().into();
-        let into_tokens: Vec<Token> = sent.into();
-        assert_eq!(tokens, into_tokens);
     }
 }

@@ -1,7 +1,7 @@
 use std::io;
 
 use error::Result;
-use token::Sentence;
+use token::{DisplaySentence, Sentence};
 
 /// A trait for objects that can write CoNLL-X `Sentence`s.
 pub trait WriteSentence {
@@ -44,10 +44,10 @@ impl<W: io::Write> Writer<W> {
     ///
     /// let output = Vec::new();
     /// let mut writer = Writer::new(output);
-    /// let sent = Sentence::new(vec![
+    /// let sent = vec![
     ///   Token::new("hello"),
     ///   Token::new("world"),
-    /// ]);
+    /// ];
     ///
     /// writer.write_sentence(&sent).unwrap();
     ///
@@ -62,9 +62,9 @@ impl<W: io::Write> WriteSentence for Writer<W> {
     fn write_sentence(&mut self, sentence: &Sentence) -> Result<()> {
         if self.first {
             self.first = false;
-            write!(self.write, "{}", sentence)?
+            write!(self.write, "{}", DisplaySentence(sentence))?
         } else {
-            write!(self.write, "\n\n{}", sentence)?
+            write!(self.write, "\n\n{}", DisplaySentence(sentence))?
         }
 
         Ok(())

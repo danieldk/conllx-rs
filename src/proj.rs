@@ -236,7 +236,7 @@ impl Deprojectivize for HeadProjectivizer {
 }
 
 pub fn sentence_to_graph(sentence: &Sentence) -> Result<Graph<(), String, Directed>> {
-    let mut edges = Vec::with_capacity(sentence.as_tokens().len() + 1);
+    let mut edges = Vec::with_capacity(sentence.len() + 1);
     for (idx, token) in sentence.iter().enumerate() {
         let (head, dependent) = match token.head() {
             Some(head) => (node_index(head), node_index(idx + 1)),
@@ -303,11 +303,9 @@ pub fn non_projective_edges(graph: &Graph<(), String, Directed>) -> Vec<EdgeInde
 fn update_sentence(graph: &Graph<(), String, Directed>, sent: &Sentence) -> Sentence {
     let mut new_sent = sent.clone();
     {
-        let tokens = new_sent.as_tokens_mut();
-
         for edge_ref in graph.edge_references() {
-            tokens[edge_ref.target().index() - 1].set_head(Some(edge_ref.source().index()));
-            tokens[edge_ref.target().index() - 1].set_head_rel(Some(edge_ref.weight().clone()));
+            new_sent[edge_ref.target().index() - 1].set_head(Some(edge_ref.source().index()));
+            new_sent[edge_ref.target().index() - 1].set_head_rel(Some(edge_ref.weight().clone()));
         }
     }
 

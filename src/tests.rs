@@ -7,7 +7,7 @@ lazy_static!{
 
 pub static ref TEST_SENTENCES: Vec<Sentence> =
     vec![
-        Sentence::new(vec![
+        vec![
             TokenBuilder::new("Die")
                 .lemma("die")
                 .cpos("ART")
@@ -26,8 +26,8 @@ pub static ref TEST_SENTENCES: Vec<Sentence> =
                 .head(0)
                 .head_rel("ROOT")
                 .token(),
-        ]),
-        Sentence::new(vec![
+        ],
+        vec![
             TokenBuilder::new("Gilles")
                 .lemma("Gilles")
                 .cpos("N")
@@ -46,7 +46,7 @@ pub static ref TEST_SENTENCES: Vec<Sentence> =
                 .head(1)
                 .head_rel("APP")
                 .token(),
-        ]),
+        ],
     ];
 }
 

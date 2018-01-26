@@ -59,7 +59,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                     return Ok(None);
                 }
 
-                return Ok(Some(Sentence::new(tokens)));
+                return Ok(Some(tokens));
             }
 
             // The blank line is a sentence separator. We want to be robust
@@ -70,7 +70,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
                     continue;
                 }
 
-                return Ok(Some(Sentence::new(tokens)));
+                return Ok(Some(tokens));
             }
 
             let mut iter = line.trim().split_terminator('\t');
