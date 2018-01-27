@@ -1,27 +1,30 @@
-error_chain!{
-    foreign_links {
-        Io(::std::io::Error);
-    }
 
-    errors {
-        MissingFormFieldError {
-            description("form field is missing")
-            display("form field is missing")
-        }
+#[derive(Debug, Fail)]
+pub enum ReadError {
+    /// The form is missing in the CoNLL-X data.
+    #[fail(display = "form field is missing")]
+    MissingFormField,
 
-        ParseIntFieldError(value: String) {
-            description("cannot parse integer field")
-            display("cannot parse as integer field: '{}'", value)
-        }
+    /// An integer field could not be parsed as an integer.
+    #[fail(display = "cannot parse as integer field: {}", value)]
+    ParseIntField {
+        value: String
+    },
 
-        ParseIdentifierFieldError(value: String) {
-            description("cannot parse identifier field")
-            display("cannot parse as identifier field: '{}'", value)
-        }
+    /// The identifier field could not be parsed.
+    #[fail(display = "cannot parse as identifier field: {}", value)]
+    ParseIdentifierField {
+        value: String
+    },
+}
 
-        IncompleteGraphError(value: String) {
-            description("incomplete graph")
-            display("incomplete graph: '{}'", value)
-        }
+
+/// Graph errors.
+#[derive(Debug, Fail)]
+pub enum GraphError {
+    /// The graph is missing relevant information.
+    #[fail(display = "incomplete graph: {}", value)]
+    IncompleteGraph {
+        value: String,
     }
 }

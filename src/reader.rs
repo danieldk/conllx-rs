@@ -1,8 +1,10 @@
 use std::io;
 
+use failure::Error;
+
 use features::Features;
 use token::{Sentence, Token, EMPTY_TOKEN};
-use error::{ErrorKind, Result, ResultExt};
+use error::ReadError;
 
 /// A trait for objects that can read CoNLL-X `Sentence`s
 pub trait ReadSentence {
@@ -12,7 +14,7 @@ pub trait ReadSentence {
     ///
     /// A call to `read_sentence` may generate an error to indicate that
     /// the operation could not be completed.
-    fn read_sentence(&mut self) -> Result<Option<Sentence>>;
+    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error>;
 
     /// Get an iterator over the sentences in this reader.
     fn sentences(self) -> Sentences<Self>
@@ -37,7 +39,7 @@ impl<R: io::BufRead> Reader<R> {
 }
 
 impl<R: io::BufRead> IntoIterator for Reader<R> {
-    type Item = Result<Sentence>;
+    type Item = Result<Sentence, Error>;
     type IntoIter = Sentences<Reader<R>>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -46,7 +48,7 @@ impl<R: io::BufRead> IntoIterator for Reader<R> {
 }
 
 impl<R: io::BufRead> ReadSentence for Reader<R> {
-    fn read_sentence(&mut self) -> Result<Option<Sentence>> {
+    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error> {
         let mut line = String::new();
         let mut tokens = Vec::new();
 
@@ -104,9 +106,9 @@ impl<R> Iterator for Sentences<R>
 where
     R: ReadSentence,
 {
-    type Item = Result<Sentence>;
+    type Item = Result<Sentence, Error>;
 
-    fn next(&mut self) -> Option<Result<Sentence>> {
+    fn next(&mut self) -> Option<Result<Sentence, Error>> {
         match self.reader.read_sentence() {
             Ok(None) => None,
             Ok(Some(sent)) => Some(Ok(sent)),
@@ -115,10 +117,10 @@ where
     }
 }
 
-fn parse_form_field(field: Option<&str>) -> Result<String> {
+fn parse_form_field(field: Option<&str>) -> Result<String, ReadError> {
     field
         .map(str::to_owned)
-        .ok_or(ErrorKind::MissingFormFieldError.into())
+        .ok_or(ReadError::MissingFormField)
 }
 
 fn parse_string_field(field: Option<&str>) -> Option<String> {
@@ -129,37 +131,41 @@ fn parse_string_field(field: Option<&str>) -> Option<String> {
     })
 }
 
-fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>> {
+fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>, ReadError> {
     match field {
         None => {
             return Err(
-                ErrorKind::ParseIdentifierFieldError(
-                    "A token identifier should be present".to_owned(),
-                ).into(),
+                ReadError::ParseIdentifierField{
+                    value: "A token identifier should be present".to_owned(),
+                }.into()
             )
         }
         Some(s) => {
             if s == EMPTY_TOKEN {
-                return Err(ErrorKind::ParseIdentifierFieldError(s.to_owned()).into());
+                return Err(ReadError::ParseIdentifierField {
+                    value: s.to_owned()
+                }.into());
             }
 
             Ok(Some(
-                s.parse()
-                    .chain_err(|| ErrorKind::ParseIntFieldError(s.to_owned()))?,
+                s.parse::<usize>().map_err(|_|
+                    ReadError::ParseIntField {
+                        value: s.to_owned()
+                    })?,
             ))
         }
     }
 }
 
-fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>> {
+fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>, ReadError> {
     match field {
         None => Ok(None),
         Some(s) => if s == EMPTY_TOKEN {
             Ok(None)
         } else {
             Ok(Some(
-                s.parse()
-                    .chain_err(|| ErrorKind::ParseIntFieldError(s.to_owned()))?,
+                s.parse::<usize>()
+                    .map_err(|_| ReadError::ParseIntField{value: s.to_owned()})?,
             ))
         },
     }
@@ -204,14 +210,14 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "ParseIntFieldError")]
+    #[should_panic(expected = "ParseIntField")]
     fn reader_rejects_non_numeric_id() {
         let mut reader = super::Reader::new(string_reader("test"));
         reader.read_sentence().unwrap();
     }
 
     #[test]
-    #[should_panic(expected = "ParseIdentifierFieldError")]
+    #[should_panic(expected = "ParseIdentifierField")]
     fn reader_rejects_underscore_id() {
         let mut reader = super::Reader::new(string_reader("_"));
         reader.read_sentence().unwrap();

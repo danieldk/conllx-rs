@@ -1,5 +1,5 @@
 #[macro_use]
-extern crate error_chain;
+extern crate failure;
 
 extern crate itertools;
 
@@ -8,7 +8,7 @@ extern crate lazy_init;
 extern crate petgraph;
 
 mod error;
-pub use error::{Error, ErrorKind, Result};
+pub use error::{ReadError, GraphError};
 
 mod features;
 pub use features::Features;

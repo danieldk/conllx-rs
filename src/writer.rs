@@ -1,6 +1,6 @@
 use std::io;
+use std::io::Result;
 
-use error::Result;
 use token::{DisplaySentence, Sentence};
 
 /// A trait for objects that can write CoNLL-X `Sentence`s.

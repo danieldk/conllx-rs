@@ -7,16 +7,15 @@ use petgraph::graph::{node_index, EdgeIndex, NodeIndex};
 use petgraph::visit::{Bfs, EdgeRef, NodeFiltered, Walker};
 
 use BfsWithDepth;
-use ErrorKind::IncompleteGraphError;
-use Result;
+use GraphError;
 use Sentence;
 
 pub trait Deprojectivize {
-    fn deprojectivize(&self, sentence: &Sentence) -> Result<Sentence>;
+    fn deprojectivize(&self, sentence: &Sentence) -> Result<Sentence, GraphError>;
 }
 
 pub trait Projectivize {
-    fn projectivize(&self, sentence: &Sentence) -> Result<Sentence>;
+    fn projectivize(&self, sentence: &Sentence) -> Result<Sentence, GraphError>;
 }
 
 /// A projectivizer using the 'head' marking strategy. See: *Pseudo-Projective
@@ -181,7 +180,7 @@ impl HeadProjectivizer {
 }
 
 impl Projectivize for HeadProjectivizer {
-    fn projectivize(&self, sentence: &Sentence) -> Result<Sentence> {
+    fn projectivize(&self, sentence: &Sentence) -> Result<Sentence, GraphError> {
         let mut graph = sentence_to_graph(sentence)?;
         let mut lifted = HashSet::new();
 
@@ -203,7 +202,7 @@ impl Projectivize for HeadProjectivizer {
 }
 
 impl Deprojectivize for HeadProjectivizer {
-    fn deprojectivize(&self, sentence: &Sentence) -> Result<Sentence> {
+    fn deprojectivize(&self, sentence: &Sentence) -> Result<Sentence, GraphError> {
         let graph = sentence_to_graph(sentence)?;
 
         // Find nodes and corresponding edges that are lifted and remove
@@ -235,7 +234,7 @@ impl Deprojectivize for HeadProjectivizer {
     }
 }
 
-pub fn sentence_to_graph(sentence: &Sentence) -> Result<Graph<(), String, Directed>> {
+pub fn sentence_to_graph(sentence: &Sentence) -> Result<Graph<(), String, Directed>, GraphError> {
     let mut edges = Vec::with_capacity(sentence.len() + 1);
     for (idx, token) in sentence.iter().enumerate() {
         let (head, dependent) = match token.head() {
@@ -247,12 +246,12 @@ pub fn sentence_to_graph(sentence: &Sentence) -> Result<Graph<(), String, Direct
             Some(head_rel) => head_rel,
             None => {
                 return Err(
-                    IncompleteGraphError(format!(
-                        "edge from {} to {} does not have a \
-                         label",
-                        head.index(),
-                        dependent.index()
-                    )).into(),
+                    GraphError::IncompleteGraph {
+                        value: format!(
+                            "edge from {} to {} does not have a label",
+                            head.index(),
+                            dependent.index())
+                    }
                 )
             }
         };
