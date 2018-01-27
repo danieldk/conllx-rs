@@ -26,7 +26,7 @@ mod reader;
 pub use reader::{ReadSentence, Reader, Sentences};
 
 mod token;
-pub use token::{Sentence, Token, TokenBuilder};
+pub use token::{DisplaySentence, Sentence, Token, TokenBuilder};
 
 mod writer;
 pub use writer::{PartitioningWriter, WriteSentence, Writer};
