@@ -138,7 +138,6 @@ mod tests {
         Ok(contents)
     }
 
-
     #[test]
     fn writer() {
         let output = Vec::new();

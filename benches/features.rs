@@ -18,11 +18,13 @@ static FEATURES: &'static [&'static str] = &[
 
 #[bench]
 pub fn bench_as_map(b: &mut Bencher) {
-    b.iter(|| for f_str in FEATURES {
-        let features = Features::from_string(*f_str);
-        black_box(features.as_map());
-        black_box(features.as_map());
-        black_box(features.as_map());
-        black_box(features.as_map());
+    b.iter(|| {
+        for f_str in FEATURES {
+            let features = Features::from_string(*f_str);
+            black_box(features.as_map());
+            black_box(features.as_map());
+            black_box(features.as_map());
+            black_box(features.as_map());
+        }
     });
 }

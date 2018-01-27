@@ -84,7 +84,6 @@ impl HeadProjectivizer {
         // to avoid attachment to the lifted_node or any of its children.
         let graph_without_lifted = NodeFiltered::from_fn(graph, |n| n != lifted_node);
 
-
         // Requirement (3): process the dependency tree by increasing depth
         // until the reattachment token is found.
         for (_, nodes) in &BfsWithDepth::new(&graph_without_lifted, node_index(0))
@@ -245,14 +244,13 @@ pub fn sentence_to_graph(sentence: &Sentence) -> Result<Graph<(), String, Direct
         let head_rel = match token.head_rel() {
             Some(head_rel) => head_rel,
             None => {
-                return Err(
-                    GraphError::IncompleteGraph {
-                        value: format!(
-                            "edge from {} to {} does not have a label",
-                            head.index(),
-                            dependent.index())
-                    }
-                )
+                return Err(GraphError::IncompleteGraph {
+                    value: format!(
+                        "edge from {} to {} does not have a label",
+                        head.index(),
+                        dependent.index()
+                    ),
+                })
             }
         };
 
@@ -287,10 +285,10 @@ pub fn non_projective_edges(graph: &Graph<(), String, Directed>) -> Vec<EdgeInde
     }
 
     non_projective.sort_by(|a, b| {
-        let a_len = max(a.source().index(), a.target().index()) -
-            min(a.source().index(), a.target().index());
-        let b_len = max(b.source().index(), b.target().index()) -
-            min(b.source().index(), b.target().index());
+        let a_len = max(a.source().index(), a.target().index())
+            - min(a.source().index(), a.target().index());
+        let b_len = max(b.source().index(), b.target().index())
+            - min(b.source().index(), b.target().index());
 
         a_len.cmp(&b_len)
     });
@@ -358,7 +356,6 @@ mod tests {
                     .expect("Cannot deprojectivize sentence")
             })
             .collect();
-
 
         assert_eq!(
             read_sentences(NONPROJECTIVE_SENTENCES_FILENAME),

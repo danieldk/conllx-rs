@@ -8,7 +8,7 @@ extern crate lazy_init;
 extern crate petgraph;
 
 mod error;
-pub use error::{ReadError, GraphError};
+pub use error::{GraphError, ReadError};
 
 mod features;
 pub use features::Features;

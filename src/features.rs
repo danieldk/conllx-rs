@@ -35,7 +35,7 @@ impl Features {
     where
         I: IntoIterator<Item = (S, Option<T>)>,
         S: Into<String>,
-        T: Into<String>
+        T: Into<String>,
     {
         let feature_map =
             BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
@@ -105,8 +105,7 @@ impl Display for Features {
     }
 }
 
-impl Eq for Features {
-}
+impl Eq for Features {}
 
 impl PartialEq for Features {
     fn eq(&self, other: &Features) -> bool {

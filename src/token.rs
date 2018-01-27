@@ -129,9 +129,7 @@ impl TokenBuilder {
 
 impl From<Token> for TokenBuilder {
     fn from(token: Token) -> Self {
-        TokenBuilder {
-            token
-        }
+        TokenBuilder { token }
     }
 }
 
