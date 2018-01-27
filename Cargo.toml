@@ -14,12 +14,12 @@ exclude = [
 
 [dependencies]
 error-chain = "0.11"
-itertools = "0.6"
-lazy-init = "0.1"
+itertools = "0.7"
+lazy-init = "0.3"
 petgraph = "0.4"
 
 [dev-dependencies]
-lazy_static = "0.2"
-maplit = "0.1"
-pretty_assertions = "0.3.4"
-quickcheck = "0.4"
+lazy_static = "1.0"
+maplit = "1.0"
+pretty_assertions = "0.4"
+quickcheck = "0.6"
