@@ -127,6 +127,14 @@ impl TokenBuilder {
     }
 }
 
+impl From<Token> for TokenBuilder {
+    fn from(token: Token) -> Self {
+        TokenBuilder {
+            token
+        }
+    }
+}
+
 /// A token with the CoNLL-X annotation layers.
 ///
 /// The fields of CoNLLX tokens are described at:
@@ -326,6 +334,12 @@ impl fmt::Display for Token {
                 .map(|s| s.as_ref())
                 .unwrap_or(EMPTY_TOKEN),
         )
+    }
+}
+
+impl From<TokenBuilder> for Token {
+    fn from(builder: TokenBuilder) -> Self {
+        builder.token
     }
 }
 
