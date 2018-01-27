@@ -131,7 +131,7 @@ impl TokenBuilder {
 ///
 /// The fields of CoNLLX tokens are described at:
 ///
-/// http://ilk.uvt.nl/conll/
+/// <http://ilk.uvt.nl/conll/>
 ///
 /// This type provides exactly the same fields, except for the ID field
 /// (since it can be derived from the sentence position of the token).
