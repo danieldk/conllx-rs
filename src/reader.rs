@@ -3,7 +3,7 @@ use std::io;
 use failure::Error;
 
 use features::Features;
-use token::{Sentence, Token, EMPTY_TOKEN};
+use token::{Token, EMPTY_TOKEN};
 use error::ReadError;
 
 /// A trait for objects that can read CoNLL-X `Sentence`s
@@ -14,7 +14,7 @@ pub trait ReadSentence {
     ///
     /// A call to `read_sentence` may generate an error to indicate that
     /// the operation could not be completed.
-    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error>;
+    fn read_sentence(&mut self) -> Result<Option<Vec<Token>>, Error>;
 
     /// Get an iterator over the sentences in this reader.
     fn sentences(self) -> Sentences<Self>
@@ -39,7 +39,7 @@ impl<R: io::BufRead> Reader<R> {
 }
 
 impl<R: io::BufRead> IntoIterator for Reader<R> {
-    type Item = Result<Sentence, Error>;
+    type Item = Result<Vec<Token>, Error>;
     type IntoIter = Sentences<Reader<R>>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -48,7 +48,7 @@ impl<R: io::BufRead> IntoIterator for Reader<R> {
 }
 
 impl<R: io::BufRead> ReadSentence for Reader<R> {
-    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error> {
+    fn read_sentence(&mut self) -> Result<Option<Vec<Token>>, Error> {
         let mut line = String::new();
         let mut tokens = Vec::new();
 
@@ -106,9 +106,9 @@ impl<R> Iterator for Sentences<R>
 where
     R: ReadSentence,
 {
-    type Item = Result<Sentence, Error>;
+    type Item = Result<Vec<Token>, Error>;
 
-    fn next(&mut self) -> Option<Result<Sentence, Error>> {
+    fn next(&mut self) -> Option<Self::Item> {
         match self.reader.read_sentence() {
             Ok(None) => None,
             Ok(Some(sent)) => Some(Ok(sent)),
@@ -174,7 +174,7 @@ mod tests {
 
     use std::io::{BufRead, Cursor};
 
-    use {ReadSentence, Sentence};
+    use {ReadSentence, Token};
     use tests::{read_sentences, TEST_SENTENCES};
 
     static BASIC: &str = "testdata/basic.conll";
@@ -187,9 +187,9 @@ mod tests {
         Box::new(Cursor::new(s.as_bytes().to_owned()))
     }
 
-    fn test_parsing(correct: &[Sentence], fragment: &str) {
+    fn test_parsing(correct: &[Vec<Token>], fragment: &str) {
         let sentences = read_sentences(fragment);
-        assert_eq!(correct, sentences.as_slice());
+        assert_eq!(correct.as_ref(), sentences.as_slice());
     }
 
     #[test]

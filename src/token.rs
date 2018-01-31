@@ -2,12 +2,9 @@ use std::fmt;
 
 use features::Features;
 
-/// A sentence with the CoNLL-X annotation layers.
-pub type Sentence = Vec<Token>;
-
 /// This data type is a small wrapper around `Vec<Token>` that implements
 /// the `Display` trait. The sentence will formatted in CoNLL-X format.
-pub struct DisplaySentence<'a>(pub &'a Sentence);
+pub struct DisplaySentence<'a>(pub &'a [Token]);
 
 impl<'a> fmt::Display for DisplaySentence<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

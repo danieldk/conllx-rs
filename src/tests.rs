@@ -1,11 +1,11 @@
 use std::fs::File;
 use std::io::BufReader;
 
-use {Features, ReadSentence, Reader, Sentence, TokenBuilder};
+use {Features, ReadSentence, Reader, Token, TokenBuilder};
 
 lazy_static!{
 
-pub static ref TEST_SENTENCES: Vec<Sentence> =
+pub static ref TEST_SENTENCES: Vec<Vec<Token>> =
     vec![
         vec![
             TokenBuilder::new("Die")
@@ -50,7 +50,7 @@ pub static ref TEST_SENTENCES: Vec<Sentence> =
     ];
 }
 
-pub fn read_sentences(filename: &str) -> Vec<Sentence> {
+pub fn read_sentences(filename: &str) -> Vec<Vec<Token>> {
     Reader::new(BufReader::new(File::open(filename).unwrap()))
         .sentences()
         .map(|s| s.unwrap())
