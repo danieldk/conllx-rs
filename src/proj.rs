@@ -9,11 +9,11 @@ use petgraph::visit::{Bfs, EdgeRef, NodeFiltered, Walker};
 use {BfsWithDepth, GraphError, Token};
 
 pub trait Deprojectivize {
-    fn deprojectivize(&self, sentence: &[Token]) -> Result<Vec<Token>, GraphError>;
+    fn deprojectivize(&self, sentence: &mut [Token]) -> Result<(), GraphError>;
 }
 
 pub trait Projectivize {
-    fn projectivize(&self, sentence: &[Token]) -> Result<Vec<Token>, GraphError>;
+    fn projectivize(&self, sentence: &mut [Token]) -> Result<(), GraphError>;
 }
 
 /// A projectivizer using the 'head' marking strategy. See: *Pseudo-Projective
@@ -177,7 +177,7 @@ impl HeadProjectivizer {
 }
 
 impl Projectivize for HeadProjectivizer {
-    fn projectivize(&self, sentence: &[Token]) -> Result<Vec<Token>, GraphError> {
+    fn projectivize(&self, sentence: &mut [Token]) -> Result<(), GraphError> {
         let mut graph = sentence_to_graph(sentence)?;
         let mut lifted = HashSet::new();
 
@@ -199,14 +199,14 @@ impl Projectivize for HeadProjectivizer {
 }
 
 impl Deprojectivize for HeadProjectivizer {
-    fn deprojectivize(&self, sentence: &[Token]) -> Result<Vec<Token>, GraphError> {
+    fn deprojectivize(&self, sentence: &mut [Token]) -> Result<(), GraphError> {
         let graph = sentence_to_graph(sentence)?;
 
         // Find nodes and corresponding edges that are lifted and remove
         // head labels from dependency relations.
         let (mut graph, head_labels) = self.prepare_deproj(&graph);
         if head_labels.is_empty() {
-            return Ok(sentence.to_owned());
+            return Ok(());
         }
 
         // Get and sort lifted tokens by increasing depth.
@@ -295,16 +295,13 @@ pub fn non_projective_edges(graph: &Graph<(), String, Directed>) -> Vec<EdgeInde
 }
 
 /// Update a sentence with dependency relations from a graph.
-fn update_sentence(graph: &Graph<(), String, Directed>, sent: &[Token]) -> Vec<Token> {
-    let mut new_sent = sent.to_owned();
+fn update_sentence(graph: &Graph<(), String, Directed>, sentence: &mut [Token]) {
     {
         for edge_ref in graph.edge_references() {
-            new_sent[edge_ref.target().index() - 1].set_head(Some(edge_ref.source().index()));
-            new_sent[edge_ref.target().index() - 1].set_head_rel(Some(edge_ref.weight().clone()));
+            sentence[edge_ref.target().index() - 1].set_head(Some(edge_ref.source().index()));
+            sentence[edge_ref.target().index() - 1].set_head_rel(Some(edge_ref.weight().clone()));
         }
     }
-
-    new_sent
 }
 
 #[cfg(test)]
@@ -346,11 +343,12 @@ mod tests {
     fn deprojectivize_test() {
         let projectivizer = HeadProjectivizer::new();
         let non_projective: Vec<_> = read_sentences(PROJECTIVE_SENTENCES_FILENAME)
-            .iter()
-            .map(|s| {
+            .into_iter()
+            .map(|mut s| {
                 projectivizer
-                    .deprojectivize(s)
-                    .expect("Cannot deprojectivize sentence")
+                    .deprojectivize(&mut s)
+                    .expect("Cannot deprojectivize sentence");
+                s
             })
             .collect();
 
@@ -371,11 +369,12 @@ mod tests {
     fn projectivize_test() {
         let projectivizer = HeadProjectivizer::new();
         let projective: Vec<_> = read_sentences(NONPROJECTIVE_SENTENCES_FILENAME)
-            .iter()
-            .map(|s| {
+            .into_iter()
+            .map(|mut s| {
                 projectivizer
-                    .projectivize(s)
-                    .expect("Cannot projectivize sentence")
+                    .projectivize(&mut s)
+                    .expect("Cannot projectivize sentence");
+                s
             })
             .collect();
 
