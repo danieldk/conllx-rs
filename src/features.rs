@@ -69,6 +69,33 @@ impl Features {
         self.features.as_ref()
     }
 
+    /// Unwrap the contained feature string and map. Since the feature map is
+    /// initialized lazily, this will force initialization of the feature map
+    /// when necessary.
+    pub fn into_inner(self) -> (String, BTreeMap<String, Option<String>>) {
+        let _ = self.feature_map.get_or_create(|| self.as_map_eager());
+        (
+            self.features,
+            self.feature_map
+                .into_inner()
+                .expect("feature map should have been initialized"),
+        )
+    }
+
+    /// Unwrap the contained feature map. Since the feature map is initialized
+    /// lazily, this will force initialization of the feature map when necessary.
+    pub fn into_inner_map(self) -> BTreeMap<String, Option<String>> {
+        let _ = self.feature_map.get_or_create(|| self.as_map_eager());
+        self.feature_map
+            .into_inner()
+            .expect("feature map should have been initialized")
+    }
+
+    /// Unwrap the contained feature string.
+    pub fn into_inner_string(self) -> String {
+        self.features
+    }
+
     fn as_map_eager(&self) -> BTreeMap<String, Option<String>> {
         let mut features = BTreeMap::new();
 
