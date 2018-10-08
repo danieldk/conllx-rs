@@ -1,4 +1,5 @@
 use std::fmt;
+use std::mem;
 
 use features::Features;
 
@@ -223,71 +224,89 @@ impl Token {
     }
 
     /// Set the word form or punctuation symbol.
-    pub fn set_form<S>(&mut self, form: S)
+    ///
+    /// Returns the form that is replaced.
+    pub fn set_form<S>(&mut self, form: S) -> String
     where
         S: Into<String>,
     {
-        self.form = form.into()
+        mem::replace(&mut self.form, form.into())
     }
 
     /// Set the lemma or stem of the word form.
-    pub fn set_lemma<S>(&mut self, lemma: Option<S>)
+    ///
+    /// Returns the lemma that is replaced.
+    pub fn set_lemma<S>(&mut self, lemma: Option<S>) -> Option<String>
     where
         S: Into<String>,
     {
-        self.lemma = lemma.map(|i| i.into())
+        mem::replace(&mut self.lemma, lemma.map(|i| i.into()))
     }
 
     /// Set the coarse-grained part-of-speech tag.
-    pub fn set_cpos<S>(&mut self, cpos: Option<S>)
+    ///
+    /// Returns the coarse-grained part-of-speech tag that is replaced.
+    pub fn set_cpos<S>(&mut self, cpos: Option<S>) -> Option<String>
     where
         S: Into<String>,
     {
-        self.cpos = cpos.map(|i| i.into())
+        mem::replace(&mut self.cpos, cpos.map(|i| i.into()))
     }
 
     /// Set the fine-grained part-of-speech tag.
-    pub fn set_pos<S>(&mut self, pos: Option<S>)
+    ///
+    /// Returns the fine-grained part-of-speech tag that is replaced.
+    pub fn set_pos<S>(&mut self, pos: Option<S>) -> Option<String>
     where
         S: Into<String>,
     {
-        self.pos = pos.map(|i| i.into())
+        mem::replace(&mut self.pos, pos.map(|i| i.into()))
     }
 
     /// Set the syntactic and/or morphological features of the token.
-    pub fn set_features(&mut self, features: Option<Features>) {
-        self.features = features
+    ///
+    /// Returns the features that are replaced.
+    pub fn set_features(&mut self, features: Option<Features>) -> Option<Features> {
+        mem::replace(&mut self.features, features)
     }
 
     /// Set the head of the token. This is the sentence position
     /// of the head **plus one**. If the head is 0, the token the root
     /// of the dependency tree.
-    pub fn set_head(&mut self, head: Option<usize>) {
-        self.head = head
+    ///
+    /// Returns the head that is replaced.
+    pub fn set_head(&mut self, head: Option<usize>) -> Option<usize> {
+        mem::replace(&mut self.head, head)
     }
 
     /// Set the dependency relation to the head of this token.
-    pub fn set_head_rel<S>(&mut self, head_rel: Option<S>)
+    ///
+    /// Returns the dependency relation that is replaced.
+    pub fn set_head_rel<S>(&mut self, head_rel: Option<S>) -> Option<String>
     where
         S: Into<String>,
     {
-        self.head_rel = head_rel.map(|i| i.into())
+        mem::replace(&mut self.head_rel, head_rel.map(|i| i.into()))
     }
 
     /// Set the projective head of the token. This is the sentence position
     /// of the head **plus one**. If the head is 0, the token the root
     /// of the dependency tree. The dependency structure resulting from the
     /// projective heads must be projective.
-    pub fn set_p_head(&mut self, p_head: Option<usize>) {
-        self.p_head = p_head
+    ///
+    /// Returns the projective head that is replaced.
+    pub fn set_p_head(&mut self, p_head: Option<usize>) -> Option<usize> {
+        mem::replace(&mut self.p_head, p_head)
     }
 
     /// Set the dependency relation to the projective head of this token.
-    pub fn set_p_head_rel<S>(&mut self, p_head_rel: Option<S>)
+    ///
+    /// Returns the projective dependency relation that is replaced.
+    pub fn set_p_head_rel<S>(&mut self, p_head_rel: Option<S>) -> Option<String>
     where
         S: Into<String>,
     {
-        self.p_head_rel = p_head_rel.map(|i| i.into())
+        mem::replace(&mut self.p_head_rel, p_head_rel.map(|i| i.into()))
     }
 }
 
