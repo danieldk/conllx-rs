@@ -1,3 +1,7 @@
+[![Crate](https://img.shields.io/crates/v/conllx.svg)](https://crates.io/crates/conllx)
+[![Docs](https://docs.rs/conllx/badge.svg)](https://docs.rs/conllx/)
+[![Build Status](https://travis-ci.org/danieldk/conllx-rs.svg?branch=master)](https://travis-ci.org/danieldk/conllx-rs)
+
 ## Introduction
 
 This is a package for reading and writing CONLL-X files in Rust. Please
