@@ -13,8 +13,8 @@ pub use error::{GraphError, ReadError};
 mod features;
 pub use features::Features;
 
-mod graph;
-pub(crate) use graph::BfsWithDepth;
+mod graph_algo;
+pub(crate) use graph_algo::BfsWithDepth;
 
 mod proj;
 pub use proj::{Deprojectivize, HeadProjectivizer, Projectivize};
