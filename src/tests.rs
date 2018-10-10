@@ -1,41 +1,50 @@
 use std::fs::File;
 use std::io::BufReader;
 
-use {Features, ReadSentence, Reader, Token, TokenBuilder};
+use {DepTriple, Features, ReadSentence, Reader, Sentence, TokenBuilder};
 
-lazy_static!{
+lazy_static! {
+    pub static ref TEST_SENTENCES: Vec<Sentence> = {
+        let mut sentences = Vec::new();
 
-pub static ref TEST_SENTENCES: Vec<Vec<Token>> =
-    vec![
-        vec![
+        let mut s1 = Sentence::new();
+        s1.push(
             TokenBuilder::new("Die")
                 .lemma("die")
                 .cpos("ART")
                 .pos("ART")
                 .features(Features::from_string("nsf"))
-                .head(2)
-                .head_rel("DET")
-                .p_head(3)
-                .p_head_rel("TEST")
-                .token(),
+                .into(),
+        );
+
+        s1.push(
             TokenBuilder::new("Großaufnahme")
                 .lemma("Großaufnahme")
                 .cpos("N")
                 .pos("NN")
                 .features(Features::from_string("nsf"))
-                .head(0)
-                .head_rel("ROOT")
-                .token(),
-        ],
-        vec![
+                .into(),
+        );
+
+        s1.dep_graph_mut()
+            .add_deprel(DepTriple::new(2, Some("DET"), 1));
+        s1.dep_graph_mut()
+            .add_deprel(DepTriple::new(0, Some("ROOT"), 2));
+        s1.proj_dep_graph_mut()
+            .add_deprel(DepTriple::new(0, Some("TEST"), 1));
+
+        sentences.push(s1);
+
+        let mut s2 = Sentence::new();
+        s2.push(
             TokenBuilder::new("Gilles")
                 .lemma("Gilles")
                 .cpos("N")
                 .pos("NE")
                 .features(Features::from_string("nsm"))
-                .head(0)
-                .head_rel("ROOT")
-                .token(),
+                .into(),
+        );
+        s2.push(
             TokenBuilder::new("Deleuze")
                 .lemma("Deleuze")
                 .cpos("N")
@@ -43,14 +52,19 @@ pub static ref TEST_SENTENCES: Vec<Vec<Token>> =
                 .features(Features::from_string(
                     "case:nominative|number:singular|gender:masculine",
                 ))
-                .head(1)
-                .head_rel("APP")
-                .token(),
-        ],
-    ];
+                .into(),
+        );
+        s2.dep_graph_mut()
+            .add_deprel(DepTriple::new(0, Some("ROOT"), 1));
+        s2.dep_graph_mut()
+            .add_deprel(DepTriple::new(1, Some("APP"), 2));
+        sentences.push(s2);
+
+        sentences
+    };
 }
 
-pub fn read_sentences(filename: &str) -> Vec<Vec<Token>> {
+pub fn read_sentences(filename: &str) -> Vec<Sentence> {
     Reader::new(BufReader::new(File::open(filename).unwrap()))
         .sentences()
         .map(|s| s.unwrap())

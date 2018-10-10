@@ -1,19 +1,19 @@
-use std::collections::{HashMap, HashSet};
 use std::cmp::{max, min};
+use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
-use petgraph::{Directed, Direction, Graph};
 use petgraph::graph::{node_index, EdgeIndex, NodeIndex};
 use petgraph::visit::{Bfs, EdgeRef, NodeFiltered, Walker};
+use petgraph::{Directed, Direction, Graph};
 
-use {BfsWithDepth, GraphError, Token};
+use {BfsWithDepth, DepTriple, GraphError, Sentence};
 
 pub trait Deprojectivize {
-    fn deprojectivize(&self, sentence: &mut [Token]) -> Result<(), GraphError>;
+    fn deprojectivize(&self, sentence: &mut Sentence) -> Result<(), GraphError>;
 }
 
 pub trait Projectivize {
-    fn projectivize(&self, sentence: &mut [Token]) -> Result<(), GraphError>;
+    fn projectivize(&self, sentence: &mut Sentence) -> Result<(), GraphError>;
 }
 
 /// A projectivizer using the 'head' marking strategy. See: *Pseudo-Projective
@@ -177,8 +177,8 @@ impl HeadProjectivizer {
 }
 
 impl Projectivize for HeadProjectivizer {
-    fn projectivize(&self, sentence: &mut [Token]) -> Result<(), GraphError> {
-        let mut graph = sentence_to_graph(sentence)?;
+    fn projectivize(&self, sentence: &mut Sentence) -> Result<(), GraphError> {
+        let mut graph = simplify_graph(sentence)?;
         let mut lifted = HashSet::new();
 
         // Lift non-projective edges until there are no non-projective
@@ -199,8 +199,8 @@ impl Projectivize for HeadProjectivizer {
 }
 
 impl Deprojectivize for HeadProjectivizer {
-    fn deprojectivize(&self, sentence: &mut [Token]) -> Result<(), GraphError> {
-        let graph = sentence_to_graph(sentence)?;
+    fn deprojectivize(&self, sentence: &mut Sentence) -> Result<(), GraphError> {
+        let graph = simplify_graph(sentence)?;
 
         // Find nodes and corresponding edges that are lifted and remove
         // head labels from dependency relations.
@@ -231,28 +231,32 @@ impl Deprojectivize for HeadProjectivizer {
     }
 }
 
-pub fn sentence_to_graph(sentence: &[Token]) -> Result<Graph<(), String, Directed>, GraphError> {
+pub fn simplify_graph(sentence: &Sentence) -> Result<Graph<(), String, Directed>, GraphError> {
     let mut edges = Vec::with_capacity(sentence.len() + 1);
-    for (idx, token) in sentence.iter().enumerate() {
-        let (head, dependent) = match token.head() {
-            Some(head) => (node_index(head), node_index(idx + 1)),
+    for idx in 0..sentence.len() {
+        let triple = match sentence.dep_graph().head(idx) {
+            Some(triple) => triple,
             None => continue,
         };
 
-        let head_rel = match token.head_rel() {
+        let head_rel = match triple.relation() {
             Some(head_rel) => head_rel,
             None => {
                 return Err(GraphError::IncompleteGraph {
                     value: format!(
                         "edge from {} to {} does not have a label",
-                        head.index(),
-                        dependent.index()
+                        triple.head(),
+                        triple.dependent()
                     ),
                 })
             }
         };
 
-        edges.push((head, dependent, head_rel.to_owned()))
+        edges.push((
+            node_index(triple.head()),
+            node_index(triple.dependent()),
+            head_rel.to_owned(),
+        ))
     }
 
     Ok(Graph::<(), String, Directed>::from_edges(edges))
@@ -295,12 +299,14 @@ pub fn non_projective_edges(graph: &Graph<(), String, Directed>) -> Vec<EdgeInde
 }
 
 /// Update a sentence with dependency relations from a graph.
-fn update_sentence(graph: &Graph<(), String, Directed>, sentence: &mut [Token]) {
-    {
-        for edge_ref in graph.edge_references() {
-            sentence[edge_ref.target().index() - 1].set_head(Some(edge_ref.source().index()));
-            sentence[edge_ref.target().index() - 1].set_head_rel(Some(edge_ref.weight().clone()));
-        }
+fn update_sentence(graph: &Graph<(), String, Directed>, sentence: &mut Sentence) {
+    let mut sent_graph = sentence.dep_graph_mut();
+    for edge_ref in graph.edge_references() {
+        sent_graph.add_deprel(DepTriple::new(
+            edge_ref.source().index(),
+            Some(edge_ref.weight().clone()),
+            edge_ref.target().index(),
+        ));
     }
 }
 
@@ -308,23 +314,27 @@ fn update_sentence(graph: &Graph<(), String, Directed>, sentence: &mut [Token]) 
 mod tests {
     use petgraph::graph::{node_index, NodeIndex};
 
-    use {non_projective_edges, sentence_to_graph, Deprojectivize, HeadProjectivizer, Projectivize, Token};
+    use super::simplify_graph;
     use tests::read_sentences;
+    use {non_projective_edges, Deprojectivize, HeadProjectivizer, Projectivize, Sentence};
 
     lazy_static! {
         static ref NON_PROJECTIVE_EDGES: Vec<Vec<(NodeIndex, NodeIndex)>> = vec![
-        vec![(node_index(8), node_index(1))],
-        vec![(node_index(10), node_index(2))],
-        vec![(node_index(5), node_index(1))],
-        vec![(node_index(1), node_index(3)), (node_index(7), node_index(5))],
+            vec![(node_index(8), node_index(1))],
+            vec![(node_index(10), node_index(2))],
+            vec![(node_index(5), node_index(1))],
+            vec![
+                (node_index(1), node_index(3)),
+                (node_index(7), node_index(5))
+            ],
         ];
     }
 
-    fn sent_non_projective_edges(sents: &[Vec<Token>]) -> Vec<Vec<(NodeIndex, NodeIndex)>> {
+    fn sent_non_projective_edges(sents: &[Sentence]) -> Vec<Vec<(NodeIndex, NodeIndex)>> {
         let mut np_edges = Vec::new();
 
         for sent in sents {
-            let graph = sentence_to_graph(sent).unwrap();
+            let graph = simplify_graph(sent).unwrap();
             let np: Vec<_> = non_projective_edges(&graph)
                 .iter()
                 .map(|idx| graph.edge_endpoints(*idx).unwrap())
@@ -349,8 +359,7 @@ mod tests {
                     .deprojectivize(&mut s)
                     .expect("Cannot deprojectivize sentence");
                 s
-            })
-            .collect();
+            }).collect();
 
         assert_eq!(
             read_sentences(NONPROJECTIVE_SENTENCES_FILENAME),
@@ -375,8 +384,7 @@ mod tests {
                     .projectivize(&mut s)
                     .expect("Cannot projectivize sentence");
                 s
-            })
-            .collect();
+            }).collect();
 
         assert_eq!(read_sentences(PROJECTIVE_SENTENCES_FILENAME), projective);
     }

@@ -1,27 +1,8 @@
-use std::fmt;
 use std::mem;
 
 use features::Features;
 
-/// This data type is a small wrapper around `Vec<Token>` that implements
-/// the `Display` trait. The sentence will formatted in CoNLL-X format.
-pub struct DisplaySentence<'a>(pub &'a [Token]);
-
-impl<'a> fmt::Display for DisplaySentence<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let last_id = self.0.len() - 1;
-
-        for (id, token) in self.0.iter().enumerate() {
-            if id == last_id {
-                write!(f, "{}\t{}", id + 1, token)?
-            } else {
-                write!(f, "{}\t{}\n", id + 1, token)?
-            }
-        }
-
-        Ok(())
-    }
-}
+pub const EMPTY_TOKEN: &'static str = "_";
 
 /// A builder for `Token`s.
 ///
@@ -84,45 +65,6 @@ impl TokenBuilder {
         self.token.set_features(Some(features));
         self
     }
-
-    /// Set the head of the token. This is the sentence position
-    /// of the head **plus one**. If the head is 0, the token the root
-    /// of the dependency tree.
-    pub fn head(mut self, head: usize) -> TokenBuilder {
-        self.token.set_head(Some(head));
-        self
-    }
-
-    /// Set the dependency relation to the head of this token.
-    pub fn head_rel<S>(mut self, head_rel: S) -> TokenBuilder
-    where
-        S: Into<String>,
-    {
-        self.token.set_head_rel(Some(head_rel));
-        self
-    }
-
-    /// Set the projective head of the token. This is the sentence position
-    /// of the head **plus one**. If the head is 0, the token the root
-    /// of the dependency tree. The dependency structure resulting from the
-    /// projective heads must be projective.
-    pub fn p_head(mut self, p_head: usize) -> TokenBuilder {
-        self.token.set_p_head(Some(p_head));
-        self
-    }
-
-    /// Set the dependency relation to the projective head of this token.
-    pub fn p_head_rel<S>(mut self, p_head_rel: S) -> TokenBuilder
-    where
-        S: Into<String>,
-    {
-        self.token.set_p_head_rel(Some(p_head_rel));
-        self
-    }
-
-    pub fn token(self) -> Token {
-        self.token
-    }
 }
 
 impl From<Token> for TokenBuilder {
@@ -131,16 +73,12 @@ impl From<Token> for TokenBuilder {
     }
 }
 
-/// A token with the CoNLL-X annotation layers.
-///
-/// The fields of CoNLLX tokens are described at:
-///
-/// <http://ilk.uvt.nl/conll/>
-///
-/// This type provides exactly the same fields, except for the ID field
-/// (since it can be derived from the sentence position of the token).
-/// If a particular field is absent (*_* in the CoNLL-X format), its
-/// value is `None`.
+impl From<TokenBuilder> for Token {
+    fn from(builder: TokenBuilder) -> Self {
+        builder.token
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Token {
     form: String,
@@ -148,10 +86,6 @@ pub struct Token {
     cpos: Option<String>,
     pos: Option<String>,
     features: Option<Features>,
-    head: Option<usize>,
-    head_rel: Option<String>,
-    p_head: Option<usize>,
-    p_head_rel: Option<String>,
 }
 
 impl Token {
@@ -166,10 +100,6 @@ impl Token {
             cpos: None,
             pos: None,
             features: None,
-            head: None,
-            head_rel: None,
-            p_head: None,
-            p_head_rel: None,
         }
     }
 
@@ -196,31 +126,6 @@ impl Token {
     /// Get the syntactic and/or morphological features of the token.
     pub fn features(&self) -> Option<&Features> {
         self.features.as_ref()
-    }
-
-    /// Get the head of the token. This is the sentence position
-    /// of the head **plus one**. If the head is 0, the token the root
-    /// of the dependency tree.
-    pub fn head(&self) -> Option<usize> {
-        self.head
-    }
-
-    /// Get the dependency relation to the head of this token.
-    pub fn head_rel(&self) -> Option<&str> {
-        self.head_rel.as_ref().map(String::as_ref)
-    }
-
-    /// Get the projective head of the token. This is the sentence position
-    /// of the head **plus one**. If the head is 0, the token the root
-    /// of the dependency tree. The dependency structure resulting from the
-    /// projective heads must be projective.
-    pub fn p_head(&self) -> Option<usize> {
-        self.p_head
-    }
-
-    /// Get the dependency relation to the projective head of this token.
-    pub fn p_head_rel(&self) -> Option<&str> {
-        self.p_head_rel.as_ref().map(String::as_ref)
     }
 
     /// Set the word form or punctuation symbol.
@@ -269,92 +174,6 @@ impl Token {
     pub fn set_features(&mut self, features: Option<Features>) -> Option<Features> {
         mem::replace(&mut self.features, features)
     }
-
-    /// Set the head of the token. This is the sentence position
-    /// of the head **plus one**. If the head is 0, the token the root
-    /// of the dependency tree.
-    ///
-    /// Returns the head that is replaced.
-    pub fn set_head(&mut self, head: Option<usize>) -> Option<usize> {
-        mem::replace(&mut self.head, head)
-    }
-
-    /// Set the dependency relation to the head of this token.
-    ///
-    /// Returns the dependency relation that is replaced.
-    pub fn set_head_rel<S>(&mut self, head_rel: Option<S>) -> Option<String>
-    where
-        S: Into<String>,
-    {
-        mem::replace(&mut self.head_rel, head_rel.map(|i| i.into()))
-    }
-
-    /// Set the projective head of the token. This is the sentence position
-    /// of the head **plus one**. If the head is 0, the token the root
-    /// of the dependency tree. The dependency structure resulting from the
-    /// projective heads must be projective.
-    ///
-    /// Returns the projective head that is replaced.
-    pub fn set_p_head(&mut self, p_head: Option<usize>) -> Option<usize> {
-        mem::replace(&mut self.p_head, p_head)
-    }
-
-    /// Set the dependency relation to the projective head of this token.
-    ///
-    /// Returns the projective dependency relation that is replaced.
-    pub fn set_p_head_rel<S>(&mut self, p_head_rel: Option<S>) -> Option<String>
-    where
-        S: Into<String>,
-    {
-        mem::replace(&mut self.p_head_rel, p_head_rel.map(|i| i.into()))
-    }
-}
-
-pub const EMPTY_TOKEN: &'static str = "_";
-
-impl fmt::Display for Token {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let head_str = self.head.as_ref().map(|n| n.to_string());
-        let p_head_str = self.p_head.as_ref().map(|n| n.to_string());
-
-        write!(
-            f,
-            "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
-            self.form.as_str(),
-            self.lemma
-                .as_ref()
-                .map(|s| s.as_ref())
-                .unwrap_or(EMPTY_TOKEN),
-            self.cpos
-                .as_ref()
-                .map(|s| s.as_ref())
-                .unwrap_or(EMPTY_TOKEN),
-            self.pos.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
-            self.features
-                .as_ref()
-                .map(|s| s.as_str())
-                .unwrap_or(EMPTY_TOKEN),
-            head_str.as_ref().map(|s| s.as_ref()).unwrap_or(EMPTY_TOKEN),
-            self.head_rel
-                .as_ref()
-                .map(|s| s.as_ref())
-                .unwrap_or(EMPTY_TOKEN),
-            p_head_str
-                .as_ref()
-                .map(|s| s.as_ref())
-                .unwrap_or(EMPTY_TOKEN),
-            self.p_head_rel
-                .as_ref()
-                .map(|s| s.as_ref())
-                .unwrap_or(EMPTY_TOKEN),
-        )
-    }
-}
-
-impl From<TokenBuilder> for Token {
-    fn from(builder: TokenBuilder) -> Self {
-        builder.token
-    }
 }
 
 #[cfg(test)]
@@ -362,6 +181,17 @@ mod tests {
     use std::collections::BTreeMap;
 
     use super::{Features, Token, TokenBuilder};
+
+    #[test]
+    fn features() {
+        let tokens = token_with_features();
+        let features = features_correct();
+
+        for (token, correct) in tokens.iter().zip(features) {
+            let kv = token.features().as_ref().unwrap().as_map();
+            assert_eq!(&correct, kv);
+        }
+    }
 
     fn token_with_features() -> Vec<Token> {
         vec![
@@ -371,18 +201,13 @@ mod tests {
                 .pos("NE")
                 .features(Features::from_string(
                     "case:nominative|number:singular|gender:masculine",
-                ))
-                .head(0)
-                .head_rel("ROOT")
-                .token(),
+                )).into(),
             TokenBuilder::new("Deleuze")
                 .lemma("Deleuze")
                 .cpos("N")
                 .pos("NE")
                 .features(Features::from_string("nominative|singular|masculine"))
-                .head(1)
-                .head_rel("APP")
-                .token(),
+                .into(),
         ]
     }
 
@@ -398,16 +223,5 @@ mod tests {
         correct2.insert("masculine".to_owned(), None);
 
         vec![correct1, correct2]
-    }
-
-    #[test]
-    fn features() {
-        let tokens = token_with_features();
-        let features = features_correct();
-
-        for (token, correct) in tokens.iter().zip(features) {
-            let kv = token.features().as_ref().unwrap().as_map();
-            assert_eq!(&correct, kv);
-        }
     }
 }

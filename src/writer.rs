@@ -1,7 +1,7 @@
 use std::io;
 use std::io::Result;
 
-use token::{DisplaySentence, Token};
+use Sentence;
 
 /// A trait for objects that can write CoNLL-X `Sentence`s.
 pub trait WriteSentence {
@@ -11,7 +11,7 @@ pub trait WriteSentence {
     ///
     /// A call to `write_sentence` may generate an error to indicate that
     /// the operation could not be completed.
-    fn write_sentence<S>(&mut self, sentence: S) -> Result<()> where S: AsRef<[Token]>;
+    fn write_sentence(&mut self, sentence: &Sentence) -> Result<()>;
 }
 
 /// A writer for CoNLL-X sentences.
@@ -39,15 +39,15 @@ impl<W: io::Write> Writer<W> {
     /// # Examples
     ///
     /// ```
-    /// use conllx::{Token, WriteSentence, Writer};
     /// use std::str;
+    ///
+    /// use conllx::{Sentence, Token, WriteSentence, Writer};
     ///
     /// let output = Vec::new();
     /// let mut writer = Writer::new(output);
-    /// let sent = vec![
-    ///   Token::new("hello"),
-    ///   Token::new("world"),
-    /// ];
+    /// let mut sent = Sentence::new();
+    /// sent.push(Token::new("hello"));
+    /// sent.push(Token::new("world"));
     ///
     /// writer.write_sentence(&sent).unwrap();
     ///
@@ -59,12 +59,12 @@ impl<W: io::Write> Writer<W> {
 }
 
 impl<W: io::Write> WriteSentence for Writer<W> {
-    fn write_sentence<S>(&mut self, sentence: S) -> Result<()> where S: AsRef<[Token]> {
+    fn write_sentence(&mut self, sentence: &Sentence) -> Result<()> {
         if self.first {
             self.first = false;
-            write!(self.write, "{}", DisplaySentence(sentence.as_ref()))?
+            write!(self.write, "{}", sentence)?
         } else {
-            write!(self.write, "\n\n{}", DisplaySentence(sentence.as_ref()))?
+            write!(self.write, "\n{}", sentence)?
         }
 
         Ok(())
@@ -107,7 +107,7 @@ impl<W> WriteSentence for PartitioningWriter<W>
 where
     W: WriteSentence,
 {
-    fn write_sentence<S>(&mut self, sentence: S) -> Result<()> where S: AsRef<[Token]> {
+    fn write_sentence(&mut self, sentence: &Sentence) -> Result<()> {
         if self.fold == self.writers.len() {
             self.fold = 0
         }

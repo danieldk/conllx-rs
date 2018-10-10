@@ -13,6 +13,9 @@ pub use error::{GraphError, ReadError};
 mod features;
 pub use features::Features;
 
+mod graph;
+pub use graph::{DepGraph, DepGraphMut, DepTriple, Edge, Node, Projectivity, Sentence};
+
 mod graph_algo;
 pub(crate) use graph_algo::BfsWithDepth;
 
@@ -20,13 +23,13 @@ mod proj;
 pub use proj::{Deprojectivize, HeadProjectivizer, Projectivize};
 
 #[cfg(test)]
-pub(crate) use proj::{non_projective_edges, sentence_to_graph};
+pub(crate) use proj::non_projective_edges;
 
 mod reader;
 pub use reader::{ReadSentence, Reader, Sentences};
 
 mod token;
-pub use token::{DisplaySentence, Token, TokenBuilder};
+pub use token::{Token, TokenBuilder};
 
 mod writer;
 pub use writer::{PartitioningWriter, WriteSentence, Writer};

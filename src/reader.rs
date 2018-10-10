@@ -2,9 +2,10 @@ use std::io;
 
 use failure::Error;
 
-use features::Features;
-use token::{Token, EMPTY_TOKEN};
 use error::ReadError;
+use features::Features;
+use token::EMPTY_TOKEN;
+use {DepTriple, Sentence, Token};
 
 /// A trait for objects that can read CoNLL-X `Sentence`s
 pub trait ReadSentence {
@@ -14,7 +15,7 @@ pub trait ReadSentence {
     ///
     /// A call to `read_sentence` may generate an error to indicate that
     /// the operation could not be completed.
-    fn read_sentence(&mut self) -> Result<Option<Vec<Token>>, Error>;
+    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error>;
 
     /// Get an iterator over the sentences in this reader.
     fn sentences(self) -> Sentences<Self>
@@ -39,7 +40,7 @@ impl<R: io::BufRead> Reader<R> {
 }
 
 impl<R: io::BufRead> IntoIterator for Reader<R> {
-    type Item = Result<Vec<Token>, Error>;
+    type Item = Result<Sentence, Error>;
     type IntoIter = Sentences<Reader<R>>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -48,31 +49,37 @@ impl<R: io::BufRead> IntoIterator for Reader<R> {
 }
 
 impl<R: io::BufRead> ReadSentence for Reader<R> {
-    fn read_sentence(&mut self) -> Result<Option<Vec<Token>>, Error> {
+    fn read_sentence(&mut self) -> Result<Option<Sentence>, Error> {
         let mut line = String::new();
-        let mut tokens = Vec::new();
+        let mut sentence = Sentence::new();
+        let mut edges = Vec::new();
+        let mut proj_edges = Vec::new();
 
         loop {
             line.clear();
 
             // End of reader.
             if self.read.read_line(&mut line)? == 0 {
-                if tokens.is_empty() {
+                if sentence.len() == 1 {
                     return Ok(None);
                 }
 
-                return Ok(Some(tokens));
+                add_edges(&mut sentence, edges, proj_edges);
+
+                return Ok(Some(sentence));
             }
 
             // The blank line is a sentence separator. We want to be robust
             // in the case a CoNLL file is malformed and has two newlines as
             // a separator.
             if line.trim().is_empty() {
-                if tokens.is_empty() {
+                if sentence.len() == 1 {
                     continue;
                 }
 
-                return Ok(Some(tokens));
+                add_edges(&mut sentence, edges, proj_edges);
+
+                return Ok(Some(sentence));
             }
 
             let mut iter = line.trim().split_terminator('\t');
@@ -84,13 +91,40 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
             token.set_cpos(parse_string_field(iter.next()));
             token.set_pos(parse_string_field(iter.next()));
             token.set_features(parse_string_field(iter.next()).map(Features::from_string));
-            token.set_head(parse_numeric_field(iter.next())?);
-            token.set_head_rel(parse_string_field(iter.next()));
-            token.set_p_head(parse_numeric_field(iter.next())?);
-            token.set_p_head_rel(parse_string_field(iter.next()));
 
-            tokens.push(token);
+            // Head relation.
+            if let Some(head) = parse_numeric_field(iter.next())? {
+                let head_rel = parse_string_field(iter.next());
+                edges.push(DepTriple::new(head, head_rel, sentence.len()));
+            }
+
+            // Projective head relation.
+            if let Some(proj_head) = parse_numeric_field(iter.next())? {
+                let proj_head_rel = parse_string_field(iter.next());
+                proj_edges.push(DepTriple::new(proj_head, proj_head_rel, sentence.len()));
+            }
+
+            //token.set_head();
+            //token.set_head_rel();
+            //token.set_p_head(parse_numeric_field(iter.next())?);
+            //token.set_p_head_rel(parse_string_field(iter.next()));
+
+            sentence.push(token);
         }
+    }
+}
+
+fn add_edges(
+    sentence: &mut Sentence,
+    edges: Vec<DepTriple<String>>,
+    proj_edges: Vec<DepTriple<String>>,
+) {
+    for edge in edges {
+        sentence.dep_graph_mut().add_deprel(edge);
+    }
+
+    for edge in proj_edges {
+        sentence.proj_dep_graph_mut().add_deprel(edge);
     }
 }
 
@@ -106,7 +140,7 @@ impl<R> Iterator for Sentences<R>
 where
     R: ReadSentence,
 {
-    type Item = Result<Vec<Token>, Error>;
+    type Item = Result<Sentence, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.reader.read_sentence() {
@@ -174,8 +208,8 @@ mod tests {
 
     use std::io::{BufRead, Cursor};
 
-    use {ReadSentence, Token};
     use tests::{read_sentences, TEST_SENTENCES};
+    use {ReadSentence, Sentence};
 
     static BASIC: &str = "testdata/basic.conll";
 
@@ -187,7 +221,7 @@ mod tests {
         Box::new(Cursor::new(s.as_bytes().to_owned()))
     }
 
-    fn test_parsing(correct: &[Vec<Token>], fragment: &str) {
+    fn test_parsing(correct: &[Sentence], fragment: &str) {
         let sentences = read_sentences(fragment);
         assert_eq!(correct.as_ref(), sentences.as_slice());
     }
