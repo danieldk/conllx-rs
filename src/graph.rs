@@ -1,3 +1,5 @@
+//! Dependency graphs.
+
 use std::borrow::Borrow;
 use std::fmt::{self, Display, Formatter};
 use std::ops::{Index, IndexMut};
@@ -6,7 +8,7 @@ use petgraph::graph::{node_index, DiGraph, NodeIndices, NodeWeightsMut};
 use petgraph::visit::EdgeRef;
 use petgraph::Direction;
 
-use {Features, Token};
+use token::{Features, Token};
 
 /// Dependency graph node.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -125,7 +127,7 @@ impl Sentence {
     /// ```
     /// extern crate conllx;
     ///
-    /// use conllx::{Node, Sentence};
+    /// use conllx::graph::{Node, Sentence};
     ///
     /// let sentence = Sentence::new();
     /// assert_eq!(sentence[0], Node::Root);

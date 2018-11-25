@@ -1,3 +1,5 @@
+//! Projectivization/deprojectivization of graphs.
+
 use std::cmp::{max, min};
 use std::collections::{HashMap, HashSet};
 
@@ -6,7 +8,8 @@ use petgraph::graph::{node_index, EdgeIndex, NodeIndex};
 use petgraph::visit::{Bfs, EdgeRef, NodeFiltered, Walker};
 use petgraph::{Directed, Direction, Graph};
 
-use {BfsWithDepth, DepTriple, GraphError, Sentence};
+use graph::{DepTriple, Sentence};
+use {BfsWithDepth, GraphError};
 
 pub trait Deprojectivize {
     fn deprojectivize(&self, sentence: &mut Sentence) -> Result<(), GraphError>;
@@ -314,9 +317,11 @@ fn update_sentence(graph: &Graph<(), String, Directed>, sentence: &mut Sentence)
 mod tests {
     use petgraph::graph::{node_index, NodeIndex};
 
-    use super::simplify_graph;
+    use graph::Sentence;
+    use proj::{
+        non_projective_edges, simplify_graph, Deprojectivize, HeadProjectivizer, Projectivize,
+    };
     use tests::read_sentences;
-    use {non_projective_edges, Deprojectivize, HeadProjectivizer, Projectivize, Sentence};
 
     lazy_static! {
         static ref NON_PROJECTIVE_EDGES: Vec<Vec<(NodeIndex, NodeIndex)>> = vec![

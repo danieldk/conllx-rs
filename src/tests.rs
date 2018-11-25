@@ -1,7 +1,9 @@
 use std::fs::File;
 use std::io::BufReader;
 
-use {DepTriple, Features, ReadSentence, Reader, Sentence, TokenBuilder};
+use graph::{DepTriple, Sentence};
+use io::{ReadSentence, Reader};
+use token::{Features, TokenBuilder};
 
 lazy_static! {
     pub static ref TEST_SENTENCES: Vec<Sentence> = {
