@@ -156,7 +156,6 @@ mod tests {
 
     use super::Features;
 
-    #[test]
     quickcheck! {
         fn from_iter(feature_map: BTreeMap<String, Option<String>>) -> bool{
             &feature_map == Features::from_iter(feature_map.clone()).as_map()
