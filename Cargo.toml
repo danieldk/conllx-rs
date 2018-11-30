@@ -19,7 +19,7 @@ lazy-init = "0.3"
 petgraph = "0.4"
 
 [dev-dependencies]
-lazy_static = "1.0"
-maplit = "1.0"
+lazy_static = "1"
+maplit = "1"
 pretty_assertions = "0.5"
-quickcheck = "0.6"
+quickcheck = "0.7"
