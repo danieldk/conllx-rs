@@ -1,6 +1,6 @@
 [package]
 name = "conllx"
-version = "0.10.2"
+version = "0.11.0"
 authors = ["Daniël de Kok <me@danieldk.eu>"]
 description = "Readers/writers for the CoNLL-X dependency format"
 documentation = "https://docs.rs/conllx/"
@@ -9,7 +9,8 @@ repository = "https://github.com/danieldk/conllx-rs"
 license = "Apache-2.0"
 readme = "README.md"
 exclude = [
-  ".gitignore"
+  ".gitignore",
+  ".travis.yml"
 ]
 
 [dependencies]
