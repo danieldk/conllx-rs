@@ -22,9 +22,7 @@ pub struct TokenBuilder {
 
 impl TokenBuilder {
     /// Create a `Token` builder with all non-form fields set to absent.
-    pub fn new<S>(form: S) -> TokenBuilder
-    where
-        S: Into<String>,
+    pub fn new(form: impl Into<String>) -> TokenBuilder
     {
         TokenBuilder {
             token: Token::new(form),
@@ -32,36 +30,28 @@ impl TokenBuilder {
     }
 
     /// Set the word form or punctuation symbol.
-    pub fn form<S>(mut self, form: S) -> TokenBuilder
-    where
-        S: Into<String>,
+    pub fn form(mut self, form: impl Into<String>) -> TokenBuilder
     {
         self.token.set_form(form);
         self
     }
 
     /// Set the lemma or stem of the word form.
-    pub fn lemma<S>(mut self, lemma: S) -> TokenBuilder
-    where
-        S: Into<String>,
+    pub fn lemma(mut self, lemma: impl Into<String>) -> TokenBuilder
     {
         self.token.set_lemma(Some(lemma));
         self
     }
 
     /// Set the coarse-grained part-of-speech tag.
-    pub fn cpos<S>(mut self, cpos: S) -> TokenBuilder
-    where
-        S: Into<String>,
+    pub fn cpos(mut self, cpos: impl Into<String>) -> TokenBuilder
     {
         self.token.set_cpos(Some(cpos));
         self
     }
 
     /// Set the fine-grained part-of-speech tag.
-    pub fn pos<S>(mut self, pos: S) -> TokenBuilder
-    where
-        S: Into<String>,
+    pub fn pos(mut self, pos: impl Into<String>) -> TokenBuilder
     {
         self.token.set_pos(Some(pos));
         self
@@ -97,9 +87,7 @@ pub struct Token {
 
 impl Token {
     /// Create a new token where all the non-form fields are absent.
-    pub fn new<S>(form: S) -> Token
-    where
-        S: Into<String>,
+    pub fn new(form: impl Into<String>) -> Token
     {
         Token {
             form: form.into(),
@@ -138,9 +126,7 @@ impl Token {
     /// Set the word form or punctuation symbol.
     ///
     /// Returns the form that is replaced.
-    pub fn set_form<S>(&mut self, form: S) -> String
-    where
-        S: Into<String>,
+    pub fn set_form(&mut self, form: impl Into<String>) -> String
     {
         mem::replace(&mut self.form, form.into())
     }
@@ -198,9 +184,7 @@ impl Features {
     /// values using a colon (`:`). Arbitrary strings will also be accepted,
     /// however they will not give a nice feature-value mapping when using
     /// `as_map`.
-    pub fn from_string<S>(s: S) -> Self
-    where
-        S: Into<String>,
+    pub fn from_string(s: impl Into<String>) -> Self
     {
         Features {
             features: s.into(),

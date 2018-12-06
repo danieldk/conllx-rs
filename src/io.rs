@@ -347,7 +347,7 @@ mod tests {
         Ok(contents)
     }
 
-    fn string_reader(s: &str) -> Box<BufRead> {
+    fn string_reader(s: &str) -> Box<dyn BufRead> {
         Box::new(Cursor::new(s.as_bytes().to_owned()))
     }
 

@@ -32,9 +32,7 @@ where
         }
     }
 
-    pub fn next<G>(&mut self, graph: G) -> Option<(N, usize)>
-    where
-        G: IntoNeighbors<NodeId = N>,
+    pub fn next(&mut self, graph: impl IntoNeighbors<NodeId = N>) -> Option<(N, usize)>
     {
         if self.cur_stack.is_empty() && !self.next_stack.is_empty() {
             mem::swap(&mut self.cur_stack, &mut self.next_stack);
