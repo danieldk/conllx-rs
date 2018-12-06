@@ -171,13 +171,15 @@ fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>, ReadErro
         None => {
             return Err(ReadError::ParseIdentifierField {
                 value: "A token identifier should be present".to_owned(),
-            }.into())
+            }
+            .into())
         }
         Some(s) => {
             if s == EMPTY_TOKEN {
                 return Err(ReadError::ParseIdentifierField {
                     value: s.to_owned(),
-                }.into());
+                }
+                .into());
             }
 
             Ok(Some(s.parse::<usize>().map_err(|_| {
@@ -192,15 +194,17 @@ fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>, ReadErro
 fn parse_numeric_field(field: Option<&str>) -> Result<Option<usize>, ReadError> {
     match field {
         None => Ok(None),
-        Some(s) => if s == EMPTY_TOKEN {
-            Ok(None)
-        } else {
-            Ok(Some(s.parse::<usize>().map_err(|_| {
-                ReadError::ParseIntField {
-                    value: s.to_owned(),
-                }
-            })?))
-        },
+        Some(s) => {
+            if s == EMPTY_TOKEN {
+                Ok(None)
+            } else {
+                Ok(Some(s.parse::<usize>().map_err(|_| {
+                    ReadError::ParseIntField {
+                        value: s.to_owned(),
+                    }
+                })?))
+            }
+        }
     }
 }
 

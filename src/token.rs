@@ -22,37 +22,32 @@ pub struct TokenBuilder {
 
 impl TokenBuilder {
     /// Create a `Token` builder with all non-form fields set to absent.
-    pub fn new(form: impl Into<String>) -> TokenBuilder
-    {
+    pub fn new(form: impl Into<String>) -> TokenBuilder {
         TokenBuilder {
             token: Token::new(form),
         }
     }
 
     /// Set the word form or punctuation symbol.
-    pub fn form(mut self, form: impl Into<String>) -> TokenBuilder
-    {
+    pub fn form(mut self, form: impl Into<String>) -> TokenBuilder {
         self.token.set_form(form);
         self
     }
 
     /// Set the lemma or stem of the word form.
-    pub fn lemma(mut self, lemma: impl Into<String>) -> TokenBuilder
-    {
+    pub fn lemma(mut self, lemma: impl Into<String>) -> TokenBuilder {
         self.token.set_lemma(Some(lemma));
         self
     }
 
     /// Set the coarse-grained part-of-speech tag.
-    pub fn cpos(mut self, cpos: impl Into<String>) -> TokenBuilder
-    {
+    pub fn cpos(mut self, cpos: impl Into<String>) -> TokenBuilder {
         self.token.set_cpos(Some(cpos));
         self
     }
 
     /// Set the fine-grained part-of-speech tag.
-    pub fn pos(mut self, pos: impl Into<String>) -> TokenBuilder
-    {
+    pub fn pos(mut self, pos: impl Into<String>) -> TokenBuilder {
         self.token.set_pos(Some(pos));
         self
     }
@@ -87,8 +82,7 @@ pub struct Token {
 
 impl Token {
     /// Create a new token where all the non-form fields are absent.
-    pub fn new(form: impl Into<String>) -> Token
-    {
+    pub fn new(form: impl Into<String>) -> Token {
         Token {
             form: form.into(),
             lemma: None,
@@ -126,8 +120,7 @@ impl Token {
     /// Set the word form or punctuation symbol.
     ///
     /// Returns the form that is replaced.
-    pub fn set_form(&mut self, form: impl Into<String>) -> String
-    {
+    pub fn set_form(&mut self, form: impl Into<String>) -> String {
         mem::replace(&mut self.form, form.into())
     }
 
@@ -184,8 +177,7 @@ impl Features {
     /// values using a colon (`:`). Arbitrary strings will also be accepted,
     /// however they will not give a nice feature-value mapping when using
     /// `as_map`.
-    pub fn from_string(s: impl Into<String>) -> Self
-    {
+    pub fn from_string(s: impl Into<String>) -> Self {
         Features {
             features: s.into(),
             feature_map: Lazy::new(),
@@ -307,7 +299,8 @@ fn map_to_string(feature_map: &BTreeMap<String, Option<String>>) -> String {
         .map(|(k, v)| match *v {
             Some(ref v) => format!("{}:{}", k, v),
             None => k.to_owned(),
-        }).join("|")
+        })
+        .join("|")
 }
 
 #[cfg(test)]
@@ -327,7 +320,7 @@ mod tests {
 
     #[test]
     fn features_from_iter_as_string() {
-        let feature_map = btreemap!{
+        let feature_map = btreemap! {
             "feature2" => Some("y"),
             "feature3" => None,
             "feature1" => Some("x")
@@ -357,7 +350,8 @@ mod tests {
                 .pos("NE")
                 .features(Features::from_string(
                     "case:nominative|number:singular|gender:masculine",
-                )).into(),
+                ))
+                .into(),
             TokenBuilder::new("Deleuze")
                 .lemma("Deleuze")
                 .cpos("N")

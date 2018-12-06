@@ -365,7 +365,8 @@ mod tests {
                     .deprojectivize(&mut s)
                     .expect("Cannot deprojectivize sentence");
                 s
-            }).collect();
+            })
+            .collect();
 
         assert_eq!(
             read_sentences(NONPROJECTIVE_SENTENCES_FILENAME),
@@ -390,7 +391,8 @@ mod tests {
                     .projectivize(&mut s)
                     .expect("Cannot projectivize sentence");
                 s
-            }).collect();
+            })
+            .collect();
 
         assert_eq!(read_sentences(PROJECTIVE_SENTENCES_FILENAME), projective);
     }
