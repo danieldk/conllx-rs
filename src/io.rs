@@ -4,9 +4,9 @@ use std::io;
 
 use failure::Error;
 
-use error::ReadError;
-use graph::{DepTriple, Sentence};
-use token::{Features, Token, EMPTY_TOKEN};
+use crate::error::ReadError;
+use crate::graph::{DepTriple, Sentence};
+use crate::token::{Features, Token, EMPTY_TOKEN};
 
 /// A trait for objects that can read CoNLL-X `Sentence`s
 pub trait ReadSentence {
@@ -331,8 +331,8 @@ mod tests {
     use failure::Error;
 
     use super::{ReadSentence, WriteSentence, Writer};
-    use graph::Sentence;
-    use tests::{read_sentences, TEST_SENTENCES};
+    use crate::graph::Sentence;
+    use crate::tests::{read_sentences, TEST_SENTENCES};
 
     static BASIC: &str = "testdata/basic.conll";
 

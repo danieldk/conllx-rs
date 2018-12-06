@@ -68,10 +68,11 @@ where
 
 #[cfg(test)]
 mod tests {
+    use lazy_static::lazy_static;
     use petgraph::graph::{node_index, Graph, NodeIndex};
     use petgraph::visit::Walker;
 
-    use BfsWithDepth;
+    use crate::BfsWithDepth;
 
     lazy_static! {
     static ref GRAPH_DEPTH_4: Graph<(), usize> = Graph::<(), usize>::from_edges(&[

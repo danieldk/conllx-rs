@@ -1,6 +1,7 @@
 [package]
 name = "conllx"
 version = "0.11.0"
+edition = "2018"
 authors = ["Daniël de Kok <me@danieldk.eu>"]
 description = "Readers/writers for the CoNLL-X dependency format"
 documentation = "https://docs.rs/conllx/"

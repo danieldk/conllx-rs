@@ -330,6 +330,9 @@ fn map_to_string(feature_map: &BTreeMap<String, Option<String>>) -> String {
 mod tests {
     use std::collections::BTreeMap;
 
+    use maplit::btreemap;
+    use quickcheck::quickcheck;
+
     use super::{Features, Token, TokenBuilder};
 
     quickcheck! {

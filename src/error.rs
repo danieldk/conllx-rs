@@ -1,3 +1,5 @@
+use failure::Fail;
+
 /// CoNLL-X read errors.
 #[derive(Debug, Fail)]
 pub enum ReadError {

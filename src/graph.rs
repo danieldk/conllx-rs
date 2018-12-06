@@ -8,7 +8,7 @@ use petgraph::graph::{node_index, DiGraph, NodeIndices, NodeWeightsMut};
 use petgraph::visit::EdgeRef;
 use petgraph::Direction;
 
-use token::{Features, Token};
+use crate::token::{Features, Token};
 
 /// Dependency graph node.
 #[derive(Clone, Debug, Eq, PartialEq)]

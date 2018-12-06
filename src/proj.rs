@@ -8,8 +8,8 @@ use petgraph::graph::{node_index, EdgeIndex, NodeIndex};
 use petgraph::visit::{Bfs, EdgeRef, NodeFiltered, Walker};
 use petgraph::{Directed, Direction, Graph};
 
-use graph::{DepTriple, Sentence};
-use {BfsWithDepth, GraphError};
+use crate::graph::{DepTriple, Sentence};
+use crate::{BfsWithDepth, GraphError};
 
 pub trait Deprojectivize {
     fn deprojectivize(&self, sentence: &mut Sentence) -> Result<(), GraphError>;
@@ -315,13 +315,14 @@ fn update_sentence(graph: &Graph<(), String, Directed>, sentence: &mut Sentence)
 
 #[cfg(test)]
 mod tests {
+    use lazy_static::lazy_static;
     use petgraph::graph::{node_index, NodeIndex};
 
-    use graph::Sentence;
-    use proj::{
+    use crate::graph::Sentence;
+    use crate::proj::{
         non_projective_edges, simplify_graph, Deprojectivize, HeadProjectivizer, Projectivize,
     };
-    use tests::read_sentences;
+    use crate::tests::read_sentences;
 
     lazy_static! {
         static ref NON_PROJECTIVE_EDGES: Vec<Vec<(NodeIndex, NodeIndex)>> = vec![

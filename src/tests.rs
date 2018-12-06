@@ -1,9 +1,11 @@
 use std::fs::File;
 use std::io::BufReader;
 
-use graph::{DepTriple, Sentence};
-use io::{ReadSentence, Reader};
-use token::{Features, TokenBuilder};
+use lazy_static::lazy_static;
+
+use crate::graph::{DepTriple, Sentence};
+use crate::io::{ReadSentence, Reader};
+use crate::token::{Features, TokenBuilder};
 
 lazy_static! {
     pub static ref TEST_SENTENCES: Vec<Sentence> = {
