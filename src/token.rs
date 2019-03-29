@@ -289,7 +289,8 @@ impl Eq for Features {}
 
 impl PartialEq for Features {
     fn eq(&self, other: &Features) -> bool {
-        self.features.eq(&other.features)
+        self.feature_map.get_or_create(|| self.as_map_eager())
+            == other.feature_map.get_or_create(|| other.as_map_eager())
     }
 }
 
@@ -373,5 +374,22 @@ mod tests {
         correct2.insert("masculine".to_owned(), None);
 
         vec![correct1, correct2]
+    }
+
+    #[test]
+    fn eq_features_is_order_insensitive() {
+        let token1: Token = TokenBuilder::new("a")
+            .features(Features::from_string("a|b:c"))
+            .into();
+        let token2 = TokenBuilder::new("a")
+            .features(Features::from_string("b:c|a"))
+            .into();
+        let token3: Token = TokenBuilder::new("a")
+            .features(Features::from_string("b|a:c"))
+            .into();
+
+        assert_eq!(token1, token2);
+        assert_ne!(token1, token3);
+        assert_ne!(token2, token3);
     }
 }
