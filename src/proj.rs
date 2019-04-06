@@ -21,6 +21,7 @@ pub trait Projectivize {
 
 /// A projectivizer using the 'head' marking strategy. See: *Pseudo-Projective
 /// Dependency Parsing*, Nivre and Nilsson, 2005.
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub struct HeadProjectivizer;
 
 impl HeadProjectivizer {
