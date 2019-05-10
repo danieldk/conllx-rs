@@ -2,6 +2,7 @@
 
 use std::borrow::Borrow;
 use std::fmt::{self, Display, Formatter};
+use std::iter::FromIterator;
 use std::ops::{Index, IndexMut};
 
 use petgraph::graph::{node_index, DiGraph, NodeIndices, NodeWeightsMut};
@@ -245,6 +246,16 @@ impl Display for Sentence {
         }
 
         Ok(())
+    }
+}
+
+impl FromIterator<Token> for Sentence {
+    fn from_iter<T>(iter: T) -> Self where T: IntoIterator<Item=Token> {
+        let mut sentence = Sentence::new();
+        for token in iter {
+            sentence.push(token);
+        }
+        sentence
     }
 }
 
