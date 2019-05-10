@@ -457,6 +457,18 @@ impl<'a> DepGraphMut<'a> {
         head_impl(self.inner, self.proj, dependent)
     }
 
+    pub fn remove_head(&mut self, dependent: usize) {
+        if let Some(edge_idx) = self
+            .inner
+            .edges_directed(node_index(dependent), Direction::Incoming)
+            .filter(|e| e.weight().0 == self.proj)
+            .map(|e| e.id())
+            .next()
+        {
+            self.inner.remove_edge(edge_idx);
+        }
+    }
+
     /// Get the number of nodes in the dependency graph.
     ///
     /// This is equal to the number of tokens, plus one root node.
@@ -618,5 +630,25 @@ mod tests {
             token.set_pos(Some("verb"));
         }
         assert_ne!(g1, g4);
+    }
+
+    #[test]
+    fn remove_deprel() {
+        let mut g = Sentence::default();
+        g.push(Token::new("Daniël"));
+        g.push(Token::new("test"));
+        g.push(Token::new("dit"));
+        g.dep_graph_mut()
+            .add_deprel(DepTriple::new(0, Some("wrong"), 1));
+        g.dep_graph_mut()
+            .add_deprel(DepTriple::new(0, Some("root"), 2));
+        g.dep_graph_mut().remove_head(1);
+
+        assert!(g.dep_graph().head(0).is_none());
+        assert!(g.dep_graph().head(1).is_none());
+        assert_eq!(
+            g.dep_graph().head(2),
+            Some(DepTriple::new(0, Some("root"), 2))
+        );
     }
 }
