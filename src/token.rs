@@ -9,7 +9,7 @@ use std::mem;
 use itertools::Itertools;
 use lazy_init::Lazy;
 
-pub const EMPTY_TOKEN: &'static str = "_";
+pub const EMPTY_TOKEN: &str = "_";
 
 /// A builder for `Token`s.
 ///
@@ -131,7 +131,7 @@ impl Token {
     where
         S: Into<String>,
     {
-        mem::replace(&mut self.lemma, lemma.map(|i| i.into()))
+        mem::replace(&mut self.lemma, lemma.map(Into::into))
     }
 
     /// Set the coarse-grained part-of-speech tag.
@@ -141,7 +141,7 @@ impl Token {
     where
         S: Into<String>,
     {
-        mem::replace(&mut self.cpos, cpos.map(|i| i.into()))
+        mem::replace(&mut self.cpos, cpos.map(Into::into))
     }
 
     /// Set the fine-grained part-of-speech tag.
@@ -151,7 +151,7 @@ impl Token {
     where
         S: Into<String>,
     {
-        mem::replace(&mut self.pos, pos.map(|i| i.into()))
+        mem::replace(&mut self.pos, pos.map(Into::into))
     }
 
     /// Set the syntactic and/or morphological features of the token.
@@ -181,25 +181,6 @@ impl Features {
         Features {
             features: s.into(),
             feature_map: Lazy::new(),
-        }
-    }
-
-    pub fn from_iter<I, S, T>(iter: I) -> Self
-    where
-        I: IntoIterator<Item = (S, Option<T>)>,
-        S: Into<String>,
-        T: Into<String>,
-    {
-        let feature_map =
-            BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
-        let features = map_to_string(&feature_map);
-
-        let lazy_feature_map = Lazy::new();
-        lazy_feature_map.get_or_create(|| feature_map);
-
-        Features {
-            features,
-            feature_map: lazy_feature_map,
         }
     }
 
@@ -255,7 +236,7 @@ impl Features {
         for fv in self.features.split('|') {
             let mut iter = fv.split(':');
             if let Some(k) = iter.next() {
-                let v = iter.next().map(|s| s.to_owned());
+                let v = iter.next().map(ToOwned::to_owned);
                 features.insert(k.to_owned(), v.to_owned());
             }
         }
@@ -287,6 +268,29 @@ impl Display for Features {
 
 impl Eq for Features {}
 
+impl<S, T> FromIterator<(S, Option<T>)> for Features
+where
+    S: Into<String>,
+    T: Into<String>,
+{
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = (S, Option<T>)>,
+    {
+        let feature_map =
+            BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
+        let features = map_to_string(&feature_map);
+
+        let lazy_feature_map = Lazy::new();
+        lazy_feature_map.get_or_create(|| feature_map);
+
+        Features {
+            features,
+            feature_map: lazy_feature_map,
+        }
+    }
+}
+
 impl PartialEq for Features {
     fn eq(&self, other: &Features) -> bool {
         self.feature_map.get_or_create(|| self.as_map_eager())
@@ -307,6 +311,7 @@ fn map_to_string(feature_map: &BTreeMap<String, Option<String>>) -> String {
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
+    use std::iter::FromIterator;
 
     use maplit::btreemap;
     use quickcheck::quickcheck;

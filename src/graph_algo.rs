@@ -38,7 +38,7 @@ where
             self.depth += 1;
         }
 
-        while let Some(node) = self.cur_stack.pop_front() {
+        if let Some(node) = self.cur_stack.pop_front() {
             for succ in graph.neighbors(node) {
                 if self.discovered.visit(succ) {
                     self.next_stack.push_back(succ)

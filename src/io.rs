@@ -36,7 +36,7 @@ impl<R: io::BufRead> Reader<R> {
     /// Construct a new reader from an object that implements the
     /// `io::BufRead` trait.
     pub fn new(read: R) -> Reader<R> {
-        Reader { read: read }
+        Reader { read }
     }
 }
 
@@ -168,18 +168,14 @@ fn parse_string_field(field: Option<&str>) -> Option<String> {
 
 fn parse_identifier_field(field: Option<&str>) -> Result<Option<usize>, ReadError> {
     match field {
-        None => {
-            return Err(ReadError::ParseIdentifierField {
-                value: "A token identifier should be present".to_owned(),
-            }
-            .into())
-        }
+        None => Err(ReadError::ParseIdentifierField {
+            value: "A token identifier should be present".to_owned(),
+        }),
         Some(s) => {
             if s == EMPTY_TOKEN {
                 return Err(ReadError::ParseIdentifierField {
                     value: s.to_owned(),
-                }
-                .into());
+                });
             }
 
             Ok(Some(s.parse::<usize>().map_err(|_| {
@@ -232,10 +228,7 @@ impl<W: io::Write> Writer<W> {
     /// Construct a new writer from an object that implements the `io::Write`
     /// trait.
     pub fn new(write: W) -> Writer<W> {
-        Writer {
-            write: write,
-            first: true,
-        }
+        Writer { write, first: true }
     }
 
     /// Borrow the embedded writer. Getting the underlying writer is often
@@ -303,10 +296,7 @@ where
     W: WriteSentence,
 {
     pub fn new(writers: Vec<W>) -> PartitioningWriter<W> {
-        PartitioningWriter {
-            writers: writers,
-            fold: 0,
-        }
+        PartitioningWriter { writers, fold: 0 }
     }
 }
 

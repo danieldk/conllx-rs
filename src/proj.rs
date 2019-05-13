@@ -33,7 +33,7 @@ impl HeadProjectivizer {
     ///
     /// Returns the index of the node that was lifted.
     fn deprojectivize_next(
-        &self,
+        self,
         graph: &mut Graph<(), String, Directed>,
         lifted_sorted: &[NodeIndex],
         head_labels: &HashMap<NodeIndex, String>,
@@ -66,7 +66,7 @@ impl HeadProjectivizer {
 
     /// Find the correct attachment point for the lifted token/node.
     fn search_attachment_point(
-        &self,
+        self,
         graph: &Graph<(), String, Directed>,
         cur_head: NodeIndex,
         lifted_node: NodeIndex,
@@ -121,7 +121,7 @@ impl HeadProjectivizer {
     /// the dependency relation of the original head is added to the dependency
     /// relation (following the head-strategy).
     fn lift(
-        &self,
+        self,
         graph: &mut Graph<(), String, Directed>,
         lifted: &mut HashSet<NodeIndex>,
         edge_idx: EdgeIndex,
@@ -153,7 +153,7 @@ impl HeadProjectivizer {
     /// relations. Return the transformed graph + indices of lifted nodes
     /// and their head labels.
     fn prepare_deproj(
-        &self,
+        self,
         graph: &Graph<(), String, Directed>,
     ) -> (Graph<(), String, Directed>, HashMap<NodeIndex, String>) {
         let mut pref_head_labels = HashMap::new();
@@ -180,6 +180,12 @@ impl HeadProjectivizer {
     }
 }
 
+impl Default for HeadProjectivizer {
+    fn default() -> Self {
+        HeadProjectivizer
+    }
+}
+
 impl Projectivize for HeadProjectivizer {
     fn projectivize(&self, sentence: &mut Sentence) -> Result<(), GraphError> {
         let mut graph = simplify_graph(sentence)?;
@@ -198,7 +204,9 @@ impl Projectivize for HeadProjectivizer {
 
         // The graph is now a projective tree. Update the dependency relations
         // in the sentence to correspond to the graph.
-        Ok(update_sentence(&graph, sentence))
+        update_sentence(&graph, sentence);
+
+        Ok(())
     }
 }
 
@@ -224,14 +232,13 @@ impl Deprojectivize for HeadProjectivizer {
 
         // Deprojectivize the graph, re-attaching one token at a time,
         // with the preference of a token that is not deep in the tree.
-        loop {
-            match self.deprojectivize_next(&mut graph, &lifted_sorted, &head_labels) {
-                Some(idx) => lifted_sorted.remove(idx),
-                None => break,
-            };
+        while let Some(idx) = self.deprojectivize_next(&mut graph, &lifted_sorted, &head_labels) {
+            lifted_sorted.remove(idx);
         }
 
-        Ok(update_sentence(&graph, sentence))
+        update_sentence(&graph, sentence);
+
+        Ok(())
     }
 }
 
@@ -299,7 +306,7 @@ pub fn non_projective_edges(graph: &Graph<(), String, Directed>) -> Vec<EdgeInde
         a_len.cmp(&b_len)
     });
 
-    non_projective.iter().map(|eref| eref.id()).collect()
+    non_projective.iter().map(EdgeRef::id).collect()
 }
 
 /// Update a sentence with dependency relations from a graph.

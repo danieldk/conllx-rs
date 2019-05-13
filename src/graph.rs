@@ -119,6 +119,7 @@ pub type Edge = (Projectivity, Option<String>);
 #[derive(Clone, Debug)]
 pub struct Sentence(DiGraph<Node, Edge>);
 
+#[allow(clippy::len_without_is_empty)]
 impl Sentence {
     /// Construct a new sentence.
     ///
@@ -238,10 +239,10 @@ impl Display for Sentence {
                 token.cpos().unwrap_or("_"),
                 token.pos().unwrap_or("_"),
                 token.features().map(Features::as_str).unwrap_or("_"),
-                head.unwrap_or("_".to_string()),
-                head_rel.unwrap_or("_".to_string()),
-                phead.unwrap_or("_".to_string()),
-                phead_rel.unwrap_or("_".to_string()),
+                head.unwrap_or_else(|| "_".to_string()),
+                head_rel.unwrap_or_else(|| "_".to_string()),
+                phead.unwrap_or_else(|| "_".to_string()),
+                phead_rel.unwrap_or_else(|| "_".to_string()),
             )?;
         }
 
@@ -250,7 +251,10 @@ impl Display for Sentence {
 }
 
 impl FromIterator<Token> for Sentence {
-    fn from_iter<T>(iter: T) -> Self where T: IntoIterator<Item=Token> {
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = Token>,
+    {
         let mut sentence = Sentence::new();
         for token in iter {
             sentence.push(token);
@@ -357,6 +361,7 @@ pub struct DepGraph<'a> {
     proj: Projectivity,
 }
 
+#[allow(clippy::len_without_is_empty)]
 impl<'a> DepGraph<'a> {
     /// Return an iterator over the dependents of `head`.
     pub fn dependents(&self, head: usize) -> impl Iterator<Item = DepTriple<&'a str>> {
@@ -422,6 +427,7 @@ pub struct DepGraphMut<'a> {
     proj: Projectivity,
 }
 
+#[allow(clippy::len_without_is_empty)]
 impl<'a> DepGraphMut<'a> {
     /// Add a dependency relation between `head` and `dependent`.
     ///
@@ -477,8 +483,7 @@ impl<'a> DepGraphMut<'a> {
         match self
             .inner
             .edges_directed(node_index(dependent), Direction::Incoming)
-            .filter(|e| e.weight().0 == self.proj)
-            .next()
+            .find(|e| e.weight().0 == self.proj)
         {
             Some(edge) => {
                 let head = edge.source().index();
@@ -535,8 +540,7 @@ fn head_impl(
 ) -> Option<DepTriple<&str>> {
     graph
         .edges_directed(node_index(dependent), Direction::Incoming)
-        .filter(|e| e.weight().0 == proj)
-        .next()
+        .find(|e| e.weight().0 == proj)
         .map(|e| {
             DepTriple::new(
                 e.source().index(),
