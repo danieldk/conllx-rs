@@ -1,6 +1,6 @@
 //! CoNLL-X format reader and writers.
 
-use std::io;
+use std::io::{BufRead, Seek, SeekFrom, Write};
 
 use failure::Error;
 
@@ -32,15 +32,15 @@ pub struct Reader<R> {
     read: R,
 }
 
-impl<R: io::BufRead> Reader<R> {
+impl<R: BufRead> Reader<R> {
     /// Construct a new reader from an object that implements the
-    /// `io::BufRead` trait.
+    /// `BufRead` trait.
     pub fn new(read: R) -> Reader<R> {
         Reader { read }
     }
 }
 
-impl<R: io::BufRead> IntoIterator for Reader<R> {
+impl<R: BufRead> IntoIterator for Reader<R> {
     type Item = Result<Sentence, Error>;
     type IntoIter = Sentences<Reader<R>>;
 
@@ -49,7 +49,7 @@ impl<R: io::BufRead> IntoIterator for Reader<R> {
     }
 }
 
-impl<R: io::BufRead> ReadSentence for Reader<R> {
+impl<R: BufRead> ReadSentence for Reader<R> {
     fn read_sentence(&mut self) -> Result<Option<Sentence>, Error> {
         let mut line = String::new();
         let mut sentence = Sentence::new();
@@ -129,11 +129,26 @@ fn add_edges(
     }
 }
 
-/// An iterator over the sentences in a `Reader`.
-pub struct Sentences<R>
+pub trait Rewind {
+    /// Rewind a reader or iterator.
+    ///
+    /// This positions the reader or iterator at the start of the
+    /// data, reading the first sentence as the next sentence.
+    fn rewind(&mut self) -> Result<(), Error>;
+}
+
+impl<R> Rewind for Reader<R>
 where
-    R: ReadSentence,
+    R: Seek,
 {
+    fn rewind(&mut self) -> Result<(), Error> {
+        self.read.seek(SeekFrom::Start(0))?;
+        Ok(())
+    }
+}
+
+/// An iterator over the sentences in a `Reader`.
+pub struct Sentences<R> {
     reader: R,
 }
 
@@ -149,6 +164,15 @@ where
             Ok(Some(sent)) => Some(Ok(sent)),
             Err(e) => Some(Err(e)),
         }
+    }
+}
+
+impl<R> Rewind for Sentences<R>
+where
+    R: Rewind,
+{
+    fn rewind(&mut self) -> Result<(), Error> {
+        self.reader.rewind()
     }
 }
 
@@ -224,8 +248,8 @@ pub struct Writer<W> {
     first: bool,
 }
 
-impl<W: io::Write> Writer<W> {
-    /// Construct a new writer from an object that implements the `io::Write`
+impl<W: Write> Writer<W> {
+    /// Construct a new writer from an object that implements the `Write`
     /// trait.
     pub fn new(write: W) -> Writer<W> {
         Writer { write, first: true }
@@ -258,7 +282,7 @@ impl<W: io::Write> Writer<W> {
     }
 }
 
-impl<W: io::Write> WriteSentence for Writer<W> {
+impl<W: Write> WriteSentence for Writer<W> {
     fn write_sentence(&mut self, sentence: &Sentence) -> Result<(), Error> {
         if self.first {
             self.first = false;
@@ -319,12 +343,12 @@ where
 #[cfg(test)]
 mod tests {
     use std::fs::File;
-    use std::io::{BufRead, Cursor, Read};
+    use std::io::{BufRead, BufReader, Cursor, Read};
     use std::str;
 
     use failure::Error;
 
-    use super::{ReadSentence, WriteSentence, Writer};
+    use super::{ReadSentence, Reader, Rewind, WriteSentence, Writer};
     use crate::graph::Sentence;
     use crate::tests::{read_sentences, TEST_SENTENCES};
 
@@ -347,7 +371,7 @@ mod tests {
 
     fn test_parsing(correct: &[Sentence], fragment: &str) {
         let sentences = read_sentences(fragment);
-        assert_eq!(correct.as_ref(), sentences.as_slice());
+        assert_eq!(correct, sentences.as_slice());
     }
 
     #[test]
@@ -377,6 +401,16 @@ mod tests {
     fn reader_rejects_underscore_id() {
         let mut reader = super::Reader::new(string_reader("_"));
         reader.read_sentence().unwrap();
+    }
+
+    #[test]
+    fn rewind() {
+        let mut sentences = Reader::new(BufReader::new(File::open(BASIC).unwrap())).sentences();
+        let sentences1 = (&mut sentences).map(|s| s.unwrap()).collect::<Vec<_>>();
+        sentences.rewind().unwrap();
+        let sentences2 = sentences.map(|s| s.unwrap()).collect::<Vec<_>>();
+        assert_eq!(&*TEST_SENTENCES, &sentences1);
+        assert_eq!(&*TEST_SENTENCES, &sentences2);
     }
 
     #[test]
