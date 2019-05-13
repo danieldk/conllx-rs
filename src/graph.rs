@@ -468,15 +468,24 @@ impl<'a> DepGraphMut<'a> {
         head_impl(self.inner, self.proj, dependent)
     }
 
-    pub fn remove_head(&mut self, dependent: usize) {
-        if let Some(edge_idx) = self
+    /// Remove relation of a token to its head.
+    ///
+    /// Returns the index of the head iff a head was removed.
+    pub fn remove_head_rel(&mut self, dependent: usize) -> Option<DepTriple<String>> {
+        // match instead of map to avoid simultaneous mutable and
+        // immutable borrow.
+        match self
             .inner
             .edges_directed(node_index(dependent), Direction::Incoming)
             .filter(|e| e.weight().0 == self.proj)
-            .map(|e| e.id())
             .next()
         {
-            self.inner.remove_edge(edge_idx);
+            Some(edge) => {
+                let head = edge.source().index();
+                let weight = self.inner.remove_edge(edge.id());
+                Some(DepTriple::new(head, weight.unwrap().1, dependent))
+            }
+            None => None,
         }
     }
 
@@ -653,7 +662,11 @@ mod tests {
             .add_deprel(DepTriple::new(0, Some("wrong"), 1));
         g.dep_graph_mut()
             .add_deprel(DepTriple::new(0, Some("root"), 2));
-        g.dep_graph_mut().remove_head(1);
+        assert_eq!(
+            g.dep_graph_mut().remove_head_rel(1),
+            Some(DepTriple::new(0, Some("wrong".to_owned()), 1))
+        );
+        assert!(g.dep_graph_mut().remove_head_rel(0).is_none());
 
         assert!(g.dep_graph().head(0).is_none());
         assert!(g.dep_graph().head(1).is_none());
