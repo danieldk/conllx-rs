@@ -234,11 +234,12 @@ impl Features {
         let mut features = BTreeMap::new();
 
         for fv in self.features.split('|') {
-            let mut iter = fv.split(':');
-            if let Some(k) = iter.next() {
-                let v = iter.next().map(ToOwned::to_owned);
-                features.insert(k.to_owned(), v.to_owned());
-            }
+            let fv: &str = fv;
+            let (k, v) = fv
+                .find(':')
+                .map(|idx| (fv[..idx].to_owned(), Some(fv[idx + 1..].to_owned())))
+                .unwrap_or_else(|| (fv.to_owned(), None));
+            features.insert(k, v);
         }
 
         features
@@ -335,6 +336,33 @@ mod tests {
         let features = Features::from_iter(feature_map);
 
         assert_eq!(features.as_str(), "feature1:x|feature2:y|feature3");
+    }
+
+    #[test]
+    fn features_with_colons() {
+        let f = "Some:feature:with|additional:colons|feature";
+        let features = Features::from_string(f);
+        let some = features
+            .as_map()
+            .get("Some")
+            .unwrap()
+            .as_ref()
+            .map(String::as_str);
+        assert_eq!(some, Some("feature:with"));
+        let additional = features
+            .as_map()
+            .get("additional")
+            .unwrap()
+            .as_ref()
+            .map(String::as_str);
+        assert_eq!(additional, Some("colons"));
+        let feature = features
+            .as_map()
+            .get("feature")
+            .unwrap()
+            .as_ref()
+            .map(String::as_str);
+        assert_eq!(feature, None);
     }
 
     #[test]
