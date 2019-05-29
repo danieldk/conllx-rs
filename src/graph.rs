@@ -487,7 +487,8 @@ impl<'a> DepGraphMut<'a> {
         {
             Some(edge) => {
                 let head = edge.source().index();
-                let weight = self.inner.remove_edge(edge.id());
+                let edge_id = edge.id();
+                let weight = self.inner.remove_edge(edge_id);
                 Some(DepTriple::new(head, weight.unwrap().1, dependent))
             }
             None => None,
