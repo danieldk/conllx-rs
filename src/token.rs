@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 use std::fmt;
-use std::fmt::{Debug, Display};
+use std::fmt::Display;
 use std::iter::FromIterator;
 use std::mem;
 use std::ops::{Deref, DerefMut};
