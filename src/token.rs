@@ -179,6 +179,13 @@ pub struct Features {
 }
 
 impl Features {
+    /// Construct an empty set of features.
+    pub fn new() -> Self {
+        Features {
+            inner: BTreeMap::new(),
+        }
+    }
+
     /// Unwrap the contained feature map.
     pub fn into_inner(self) -> BTreeMap<String, Option<String>> {
         self.inner
@@ -200,6 +207,12 @@ impl Features {
     }
 }
 
+impl Default for Features {
+    fn default() -> Self {
+        Features::new()
+    }
+}
+
 impl Deref for Features {
     type Target = BTreeMap<String, Option<String>>;
 
@@ -218,6 +231,12 @@ impl Display for Features {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let feature_str: String = self.into();
         f.write_str(&feature_str)
+    }
+}
+
+impl From<BTreeMap<String, Option<String>>> for Features {
+    fn from(feature_map: BTreeMap<String, Option<String>>) -> Self {
+        Features { inner: feature_map }
     }
 }
 
