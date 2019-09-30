@@ -9,7 +9,7 @@ use petgraph::graph::{node_index, DiGraph, NodeIndices, NodeWeightsMut};
 use petgraph::visit::EdgeRef;
 use petgraph::Direction;
 
-use crate::token::{Features, Token};
+use crate::token::Token;
 
 /// Dependency graph node.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -238,7 +238,7 @@ impl Display for Sentence {
                 token.lemma().unwrap_or("_"),
                 token.cpos().unwrap_or("_"),
                 token.pos().unwrap_or("_"),
-                token.features().map(Features::as_str).unwrap_or("_"),
+                token.features().map(Into::into).unwrap_or("_".to_string()),
                 head.unwrap_or_else(|| "_".to_string()),
                 head_rel.unwrap_or_else(|| "_".to_string()),
                 phead.unwrap_or_else(|| "_".to_string()),

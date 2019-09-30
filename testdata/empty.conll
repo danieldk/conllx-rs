@@ -2,4 +2,4 @@
 2	Großaufnahme	Großaufnahme	N	NN	nsf	0	ROOT	_	_
 
 1	Gilles	Gilles	N	NE	nsm	0	ROOT	_	_
-2	Deleuze	Deleuze	N	NE	case:nominative|number:singular|gender:masculine	1	APP	_	_
+2	Deleuze	Deleuze	N	NE	case:nominative|gender:masculine|number:singular	1	APP	_	_

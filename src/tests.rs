@@ -17,7 +17,7 @@ lazy_static! {
                 .lemma("die")
                 .cpos("ART")
                 .pos("ART")
-                .features(Features::from_string("nsf"))
+                .features(Features::from("nsf"))
                 .into(),
         );
 
@@ -26,7 +26,7 @@ lazy_static! {
                 .lemma("Großaufnahme")
                 .cpos("N")
                 .pos("NN")
-                .features(Features::from_string("nsf"))
+                .features(Features::from("nsf"))
                 .into(),
         );
 
@@ -45,7 +45,7 @@ lazy_static! {
                 .lemma("Gilles")
                 .cpos("N")
                 .pos("NE")
-                .features(Features::from_string("nsm"))
+                .features(Features::from("nsm"))
                 .into(),
         );
         s2.push(
@@ -53,8 +53,8 @@ lazy_static! {
                 .lemma("Deleuze")
                 .cpos("N")
                 .pos("NE")
-                .features(Features::from_string(
-                    "case:nominative|number:singular|gender:masculine",
+                .features(Features::from(
+                    "case:nominative|gender:masculine|number:singular",
                 ))
                 .into(),
         );

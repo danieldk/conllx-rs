@@ -5,9 +5,9 @@ use std::fmt;
 use std::fmt::{Debug, Display};
 use std::iter::FromIterator;
 use std::mem;
+use std::ops::{Deref, DerefMut};
 
 use itertools::Itertools;
-use lazy_init::Lazy;
 
 pub const EMPTY_TOKEN: &str = "_";
 
@@ -117,6 +117,13 @@ impl Token {
         self.features.as_ref()
     }
 
+    /// Get the syntactic and/or morphological features of the token.
+    ///
+    /// Returns a mutable reference, so that the features can be updated.
+    pub fn features_mut(&mut self) -> Option<&mut Features> {
+        self.features.as_mut()
+    }
+
     /// Set the word form or punctuation symbol.
     ///
     /// Returns the form that is replaced.
@@ -166,74 +173,21 @@ impl Token {
 ///
 /// In the CoNLL-X specification, these are morphological features of the
 /// token. Typically, the features are a list or a key-value mapping.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Features {
-    features: String,
-    feature_map: Lazy<BTreeMap<String, Option<String>>>,
+    inner: BTreeMap<String, Option<String>>,
 }
 
 impl Features {
-    /// Create features from a string. The casual format uses key-value
-    /// pairs that are separated by a vertical bar (`|`) and keys and
-    /// values using a colon (`:`). Arbitrary strings will also be accepted,
-    /// however they will not give a nice feature-value mapping when using
-    /// `as_map`.
-    pub fn from_string(s: impl Into<String>) -> Self {
-        Features {
-            features: s.into(),
-            feature_map: Lazy::new(),
-        }
+    /// Unwrap the contained feature map.
+    pub fn into_inner(self) -> BTreeMap<String, Option<String>> {
+        self.inner
     }
 
-    /// Get the features field as a key-value mapping. This assumes that
-    /// the key-value pairs are separed using a vertical bar (`|`) and keys
-    /// and values using a colon (`:`). If the value is absent, corresponding
-    /// value in the mapping is `None`.
-    ///
-    /// The feature map is constructed lazily:
-    ///
-    /// * If `as_map` is never called, the feature map is never created.
-    /// * If `as_map` is called once or more, the feature map is only created
-    ///   once.
-    pub fn as_map(&self) -> &BTreeMap<String, Option<String>> {
-        self.feature_map.get_or_create(|| self.as_map_eager())
-    }
-
-    /// Get the features field.
-    pub fn as_str(&self) -> &str {
-        self.features.as_ref()
-    }
-
-    /// Unwrap the contained feature string and map. Since the feature map is
-    /// initialized lazily, this will force initialization of the feature map
-    /// when necessary.
-    pub fn into_inner(self) -> (String, BTreeMap<String, Option<String>>) {
-        let _ = self.feature_map.get_or_create(|| self.as_map_eager());
-        (
-            self.features,
-            self.feature_map
-                .into_inner()
-                .expect("feature map should have been initialized"),
-        )
-    }
-
-    /// Unwrap the contained feature map. Since the feature map is initialized
-    /// lazily, this will force initialization of the feature map when necessary.
-    pub fn into_inner_map(self) -> BTreeMap<String, Option<String>> {
-        let _ = self.feature_map.get_or_create(|| self.as_map_eager());
-        self.feature_map
-            .into_inner()
-            .expect("feature map should have been initialized")
-    }
-
-    /// Unwrap the contained feature string.
-    pub fn into_inner_string(self) -> String {
-        self.features
-    }
-
-    fn as_map_eager(&self) -> BTreeMap<String, Option<String>> {
+    fn parse_features(feature_string: impl AsRef<str>) -> BTreeMap<String, Option<String>> {
         let mut features = BTreeMap::new();
 
-        for fv in self.features.split('|') {
+        for fv in feature_string.as_ref().split('|') {
             let fv: &str = fv;
             let (k, v) = fv
                 .find(':')
@@ -246,28 +200,34 @@ impl Features {
     }
 }
 
-impl Clone for Features {
-    fn clone(&self) -> Self {
-        Features {
-            features: self.features.clone(),
-            feature_map: Lazy::new(),
-        }
+impl Deref for Features {
+    type Target = BTreeMap<String, Option<String>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
     }
 }
 
-impl Debug for Features {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Features {{ features: {} }}", self.features)
+impl DerefMut for Features {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
     }
 }
 
 impl Display for Features {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(self.features.as_ref())
+        let feature_str: String = self.into();
+        f.write_str(&feature_str)
     }
 }
 
-impl Eq for Features {}
+impl From<&str> for Features {
+    fn from(feature_string: &str) -> Self {
+        Features {
+            inner: Features::parse_features(feature_string),
+        }
+    }
+}
 
 impl<S, T> FromIterator<(S, Option<T>)> for Features
 where
@@ -278,35 +238,30 @@ where
     where
         I: IntoIterator<Item = (S, Option<T>)>,
     {
-        let feature_map =
+        let features =
             BTreeMap::from_iter(iter.into_iter().map(|(k, v)| (k.into(), v.map(Into::into))));
-        let features = map_to_string(&feature_map);
 
-        let lazy_feature_map = Lazy::new();
-        lazy_feature_map.get_or_create(|| feature_map);
-
-        Features {
-            features,
-            feature_map: lazy_feature_map,
-        }
+        Features { inner: features }
     }
 }
 
-impl PartialEq for Features {
-    fn eq(&self, other: &Features) -> bool {
-        self.feature_map.get_or_create(|| self.as_map_eager())
-            == other.feature_map.get_or_create(|| other.as_map_eager())
+impl From<Features> for String {
+    fn from(features: Features) -> Self {
+        (&features).into()
     }
 }
 
-fn map_to_string(feature_map: &BTreeMap<String, Option<String>>) -> String {
-    feature_map
-        .iter()
-        .map(|(k, v)| match *v {
-            Some(ref v) => format!("{}:{}", k, v),
-            None => k.to_owned(),
-        })
-        .join("|")
+impl From<&Features> for String {
+    fn from(features: &Features) -> Self {
+        features
+            .inner
+            .iter()
+            .map(|(k, v)| match *v {
+                Some(ref v) => format!("{}:{}", k, v),
+                None => k.to_owned(),
+            })
+            .join("|")
+    }
 }
 
 #[cfg(test)]
@@ -321,7 +276,7 @@ mod tests {
 
     quickcheck! {
         fn features_from_iter(feature_map: BTreeMap<String, Option<String>>) -> bool{
-            &feature_map == Features::from_iter(feature_map.clone()).as_map()
+            feature_map == *Features::from_iter(feature_map.clone())
         }
     }
 
@@ -334,30 +289,24 @@ mod tests {
         };
 
         let features = Features::from_iter(feature_map);
+        let features_string: String = features.into();
 
-        assert_eq!(features.as_str(), "feature1:x|feature2:y|feature3");
+        assert_eq!(features_string, "feature1:x|feature2:y|feature3");
     }
 
     #[test]
     fn features_with_colons() {
         let f = "Some:feature:with|additional:colons|feature";
-        let features = Features::from_string(f);
-        let some = features
-            .as_map()
-            .get("Some")
-            .unwrap()
-            .as_ref()
-            .map(String::as_str);
+        let features = Features::from(f);
+        let some = features.get("Some").unwrap().as_ref().map(String::as_str);
         assert_eq!(some, Some("feature:with"));
         let additional = features
-            .as_map()
             .get("additional")
             .unwrap()
             .as_ref()
             .map(String::as_str);
         assert_eq!(additional, Some("colons"));
         let feature = features
-            .as_map()
             .get("feature")
             .unwrap()
             .as_ref()
@@ -371,7 +320,7 @@ mod tests {
         let features = features_correct();
 
         for (token, correct) in tokens.iter().zip(features) {
-            let kv = token.features().as_ref().unwrap().as_map();
+            let kv = &**token.features().unwrap();
             assert_eq!(&correct, kv);
         }
     }
@@ -382,7 +331,7 @@ mod tests {
                 .lemma("Gilles")
                 .cpos("N")
                 .pos("NE")
-                .features(Features::from_string(
+                .features(Features::from(
                     "case:nominative|number:singular|gender:masculine",
                 ))
                 .into(),
@@ -390,7 +339,7 @@ mod tests {
                 .lemma("Deleuze")
                 .cpos("N")
                 .pos("NE")
-                .features(Features::from_string("nominative|singular|masculine"))
+                .features(Features::from("nominative|singular|masculine"))
                 .into(),
         ]
     }
@@ -412,13 +361,13 @@ mod tests {
     #[test]
     fn eq_features_is_order_insensitive() {
         let token1: Token = TokenBuilder::new("a")
-            .features(Features::from_string("a|b:c"))
+            .features(Features::from("a|b:c"))
             .into();
         let token2 = TokenBuilder::new("a")
-            .features(Features::from_string("b:c|a"))
+            .features(Features::from("b:c|a"))
             .into();
         let token3: Token = TokenBuilder::new("a")
-            .features(Features::from_string("b|a:c"))
+            .features(Features::from("b|a:c"))
             .into();
 
         assert_eq!(token1, token2);

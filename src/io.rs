@@ -91,7 +91,7 @@ impl<R: io::BufRead> ReadSentence for Reader<R> {
             token.set_lemma(parse_string_field(iter.next()));
             token.set_cpos(parse_string_field(iter.next()));
             token.set_pos(parse_string_field(iter.next()));
-            token.set_features(parse_string_field(iter.next()).map(Features::from_string));
+            token.set_features(parse_string_field(iter.next()).map(|s| Features::from(s.as_str())));
 
             // Head relation.
             if let Some(head) = parse_numeric_field(iter.next())? {
